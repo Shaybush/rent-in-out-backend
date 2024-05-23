@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "backend",
+      "type": "node",
+      "request": "launch",
+      "cwd": "${workspaceFolder}",
+      "runtimeExecutable": "nodemon",
+      "program": "app.js",
+      "restart": true,
+      "outputCapture": "std",
+      "sourceMaps": true,
+      "env": {
+        "NODE_ENV": "development"
+      }
+    }
+  ]
+}

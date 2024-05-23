@@ -1,0 +1,35 @@
+{
+    "name": "express25",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "start": "kill-port 3001 && nodemon app.js",
+        "dev": "kill-port 3001 && node app"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "axios": "^0.27.2",
+        "bcrypt": "^5.0.1",
+        "cloudinary": "^1.32.0",
+        "cookie-parser": "^1.4.6",
+        "cors": "^2.8.5",
+        "dotenv": "^16.0.3",
+        "express": "^4.18.1",
+        "express-fileupload": "^1.4.0",
+        "express-session": "^1.17.3",
+        "joi": "^17.6.0",
+        "jsonwebtoken": "^8.5.1",
+        "lodash": "^4.17.21",
+        "mongoose": "^6.5.4",
+        "nodemailer": "^6.8.0",
+        "nodemon": "^2.0.20",
+        "socket.io": "^4.5.4",
+        "uuid": "^9.0.0"
+    },
+    "devDependencies": {
+        "kill-port": "^2.0.1"
+    }
+}
