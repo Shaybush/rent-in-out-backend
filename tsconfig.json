@@ -15,5 +15,9 @@
         "./*"
       ]
     },
+    "sourceMap": true,
+    "moduleDetection": "force"
   },
+  "exclude": ["node_modules"],
+  "files": ["index.d.ts"]
 } 

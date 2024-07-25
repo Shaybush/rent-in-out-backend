@@ -4,7 +4,9 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "kill-port 3001 && nodemon"
+        "dev": "kill-port 3001 && nodemon",
+        "start": "node dist/app.js",
+        "build": "tsc --watch"
     },
     "keywords": [],
     "author": "",

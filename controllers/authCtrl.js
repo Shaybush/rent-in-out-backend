@@ -34,7 +34,7 @@ exports.authCtrl = {
         msg: `New user ${user.fullName.firstName} ${user.fullName.lastName} created!`,
       });
     } catch (err) {
-      if (err.code == 11000) {
+      if (err.code === 11000) {
         return res
           .status(409)
           .json({ msg: 'Email already in system, try log in', code: 11000 });

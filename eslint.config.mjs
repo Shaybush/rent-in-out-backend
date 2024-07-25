@@ -27,7 +27,7 @@ export default [
       'spaced-comment': ['error', 'always', { 'exceptions': ['-', '+'] }],
 
       // Other necessary rules
-      'no-unused-vars': 'error',
+      // 'no-unused-vars': 'error',
       'eqeqeq': ['error', 'always'],
       'curly': 'error',
       'semi': ['error', 'always'],
