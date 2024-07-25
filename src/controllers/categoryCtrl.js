@@ -1,31 +1,31 @@
-const { select } = require("../helpers/userHelper");
-const { CategoryModel } = require("../models/categoryModel");
-const { validateCategory } = require("../validations/categoryValid");
+const { select } = require('../helpers/userHelper');
+const { CategoryModel } = require('../models/categoryModel');
+const { validateCategory } = require('../validations/categoryValid');
 const MAX = 10000000;
 const MIN = 0;
 
 exports.categoryCtrl = {
-  getCategorylist: async (req, res) => {
-    let sort = req.query.sort || "name";
-    let reverse = req.query.reverse == "yes" ? -1 : 1;
+  getCategorylist: async(req, res) => {
+    let sort = req.query.sort || 'name';
+    let reverse = req.query.reverse == 'yes' ? -1 : 1;
     try {
       let data = await CategoryModel.find({})
         .sort({ [sort]: reverse })
-        .populate({ path: "creator_id", select })
-        .populate({ path: "editor_id", select });
+        .populate({ path: 'creator_id', select })
+        .populate({ path: 'editor_id', select });
       return res.json(data);
     } catch (err) {
-      return res.status(500).json({ msg: "there error try again later", err });
+      return res.status(500).json({ msg: 'there error try again later', err });
     }
   },
-  search: async (req, res) => {
+  search: async(req, res) => {
     let perPage = Math.min(req.query.perPage, 20) || 10;
     let page = req.query.page || 1;
-    let sort = req.query.sort || "createdAt";
-    let reverse = req.query.reverse == "yes" ? -1 : 1;
+    let sort = req.query.sort || 'createdAt';
+    let reverse = req.query.reverse == 'yes' ? -1 : 1;
     try {
       let searchQ = req.query?.s;
-      let searchReg = new RegExp(searchQ, "i");
+      let searchReg = new RegExp(searchQ, 'i');
       let category = await CategoryModel.find({
         $and: [
           {
@@ -39,15 +39,15 @@ exports.categoryCtrl = {
         .limit(perPage)
         .skip((page - 1) * perPage)
         .sort({ [sort]: reverse })
-        .populate({ path: "creator_id", select })
-        .populate({ path: "editor_id", select });
+        .populate({ path: 'creator_id', select })
+        .populate({ path: 'editor_id', select });
       return res.json(category);
     } catch (err) {
       res.status(500).json({ message: err });
     }
   },
 
-  addCategory: async (req, res) => {
+  addCategory: async(req, res) => {
     let validBody = validateCategory(req.body);
     if (validBody.error) {
       res.status(400).json(validBody.error.details);
@@ -58,21 +58,21 @@ exports.categoryCtrl = {
       newCategory.editor_id = req.tokenData._id;
       await newCategory.save();
       let category = await CategoryModel.findById(newCategory._id)
-        .populate({ path: "creator_id", select })
-        .populate({ path: "editor_id", select });
+        .populate({ path: 'creator_id', select })
+        .populate({ path: 'editor_id', select });
       res.json(category);
     } catch (err) {
       if (err.code == 11000) {
         return res.status(409).json({
-          msg: "Category already in system, try different",
+          msg: 'Category already in system, try different',
           code: 11000,
         });
       }
-      return res.status(500).json({ msg: "err", err });
+      return res.status(500).json({ msg: 'err', err });
     }
   },
 
-  editCategory: async (req, res) => {
+  editCategory: async(req, res) => {
     let validBody = validateCategory(req.body);
     if (validBody.error) {
       res.status(400).json(validBody.error.details);
@@ -87,27 +87,27 @@ exports.categoryCtrl = {
       res.json({ category });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ msg: "err", err });
+      res.status(500).json({ msg: 'err', err });
     }
   },
 
-  deleteCategory: async (req, res) => {
+  deleteCategory: async(req, res) => {
     try {
       let idDel = req.params.idDel;
       let data = await CategoryModel.deleteOne({ _id: idDel });
       res.json(data);
     } catch (err) {
       console.error(err);
-      res.status(500).json({ msg: "err", err });
+      res.status(500).json({ msg: 'err', err });
     }
   },
-  count: async (req, res) => {
+  count: async(req, res) => {
     try {
       let count = await CategoryModel.countDocuments({});
       res.json({ count });
     } catch (err) {
       console.error(err);
-      res.status(500).json({ msg: "err", err });
+      res.status(500).json({ msg: 'err', err });
     }
   }
 };

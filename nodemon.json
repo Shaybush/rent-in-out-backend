@@ -1,6 +1,5 @@
 {
-    "watch": ["./"],
-    "ext": "ts",
-    "exec": "npx tsx ./app.ts"
+    "watch": "src/**/*.ts",
+    "execMap": { "ts": "ts-node" }
   }
   

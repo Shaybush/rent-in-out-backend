@@ -1,5 +1,5 @@
-const { config } = require("../../config/config");
-const axios = require("axios");
+const { config } = require('../../config/config');
+const axios = require('axios');
 
 const apiUrl = config.google_api;
 
@@ -9,7 +9,7 @@ exports.getUserDetailFromAccessToken = (access_token) => {
     {
       headers: {
         Authorization: `Bearer ${access_token}`,
-        Accept: "application/json",
+        Accept: 'application/json',
       },
     }
   );

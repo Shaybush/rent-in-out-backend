@@ -1,13 +1,13 @@
 {
-  "compileOnSave": false,
+  "compileOnSave": true,
   "compilerOptions": {
     "target": "ES2022", /* Set the JavaScript language version for emitted JavaScript and include compatible library declarations. */
-    "module": "ES2022", /* Specify what module code is generated. */
-    "moduleResolution": "node",
+    "module": "CommonJS", /* Specify what module code is generated. */
     "outDir": "./dist", /* Specify an output folder for all emitted files. */
     "esModuleInterop": true, /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */
     "forceConsistentCasingInFileNames": true, /* Ensure that casing is correct in imports. */
     "strict": true, /* Enable all strict type-checking options. */
+    "sourceMap": true,
     "skipLibCheck": true, /* Skip type checking all .d.ts files. */
     "allowJs": true, /* allow files with .js end */
     "paths": { /* paths lets you declare how TypeScript should resolve an import in your require/imports. */
@@ -16,4 +16,6 @@
       ]
     },
   },
+  "include": ["src/**/*.ts"],
+  "exclude": ["node_modules"],
 } 

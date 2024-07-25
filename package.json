@@ -4,18 +4,16 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "start": "kill-port 3001 && nodemon"
+        "dev": "nodemon src/app.ts",
+        "build": "tsc --watch",
+        "start": "kill-port 3001 && nodemon",
+        "lint": "eslint \"src/**/*.{ts,js}\"",
+        "lint:fix": "eslint \"src/**/*.{ts,js}\" --fix"
     },
     "keywords": [],
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@types/cors": "^2.8.17",
-        "@types/express": "^4.17.21",
-        "@types/morgan": "^1.9.9",
-        "@types/node": "^20.14.11",
-        "@typescript-eslint/eslint-plugin": "^7.17.0",
-        "@typescript-eslint/parser": "^7.17.0",
         "axios": "^1.7.2",
         "bcrypt": "^5.1.1",
         "cloudinary": "^2.3.0",
@@ -31,12 +29,21 @@
         "lodash": "^4.17.21",
         "mongoose": "^8.5.1",
         "nodemailer": "^6.9.14",
-        "nodemon": "^3.1.4",
         "socket.io": "^4.7.5",
-        "typescript": "^5.5.4",
         "uuid": "^10.0.0"
     },
     "devDependencies": {
-        "kill-port": "^2.0.1"
+        "@types/cors": "^2.8.17",
+        "@types/express": "^4.17.21",
+        "@types/morgan": "^1.9.9",
+        "@types/node": "^20.14.11",
+        "@typescript-eslint/eslint-plugin": "^7.17.0",
+        "@typescript-eslint/parser": "^7.17.0",
+        "eslint-config-prettier": "^9.1.0",
+        "eslint-plugin-prettier": "^5.2.1",
+        "kill-port": "^2.0.1",
+        "nodemon": "^3.1.4",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.5.4"
     }
 }

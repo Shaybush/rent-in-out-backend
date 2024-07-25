@@ -1,6 +1,7 @@
-require('dotenv').config();
+import dotenv from 'dotenv';
+dotenv.config();
 
-exports.config = {
+export const config = {
   userDb: process.env.USER_DB,
   passDb: process.env.PASS_DB,
   tokenSecret: process.env.TOKEN_SECRET,
