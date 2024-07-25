@@ -1,19 +1,22 @@
-import globals from 'globals';
 import tseslint from '@typescript-eslint/eslint-plugin';
 import parser from '@typescript-eslint/parser';
 
+
 export default [
   {
-    files: ['**/*.{js,mjs,cjs,ts,tsx}'],
+    files: ['**/*.{js,mjs,cjs,ts}'],
     languageOptions: {
-      globals: globals.browser,
-      parser: parser,
+      parser,
       parserOptions: {
-        ecmaVersion: 2021,
+        ecmaVersion: 2020,
         sourceType: 'module',
-        project: './tsconfig.json'
+        // project: './tsconfig.json',
+        // tsconfigRootDir: __dirname,
       },
     },
+    ignorePatterns: [
+      'index.d.ts'
+    ],
     plugins: {
       '@typescript-eslint': tseslint,
     },
