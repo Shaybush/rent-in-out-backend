@@ -1,11 +1,11 @@
-const { MessageModel } = require("../models/messageModel");
-const { UserModel } = require("../models/userModel");
+const { MessageModel } = require('../models/messageModel');
+const { UserModel } = require('../models/userModel');
 
 exports.socketCtrl = {
-  chatUpdate: async (req, res) => {
+  chatUpdate: async(req, res) => {
     let message = await UserModel.findOne({ _id: req.body.userID }).populate({
-      path: "messages",
-      select: "roomID",
+      path: 'messages',
+      select: 'roomID',
     });
     try {
       if (
@@ -35,9 +35,9 @@ exports.socketCtrl = {
       res.status(500).json({ err: err });
     }
   },
-  getChatByRoomID: async (req, res) => {
+  getChatByRoomID: async(req, res) => {
     let message = await UserModel.findOne({ _id: req.tokenData._id }).populate({
-      path: "messages",
+      path: 'messages',
     });
     let roomID = req.params.roomID;
     if (roomID) {
@@ -47,19 +47,19 @@ exports.socketCtrl = {
       } catch (err) {
         res.status(500).json({ err: err });
       }
-    } else return res.status(404).json({ msg: "Chat not found" });
+    } else {return res.status(404).json({ msg: 'Chat not found' });}
   },
-  getUserChats: async (req, res) => {
+  getUserChats: async(req, res) => {
     let message = await UserModel.findOne({ _id: req.tokenData._id }).populate({
-      path: "messages",
+      path: 'messages',
     });
     try {
-      let messages = message.messages.sort(function (a, b) {
+      let messages = message.messages.sort(function(a, b) {
         var keyA = new Date(a.updatedAt),
           keyB = new Date(b.updatedAt);
         // Compare the 2 dates
-        if (keyA > keyB) return -1;
-        if (keyA < keyB) return 1;
+        if (keyA > keyB) {return -1;}
+        if (keyA < keyB) {return 1;}
         return 0;
       });
       return res.status(200).json(messages);
@@ -67,7 +67,7 @@ exports.socketCtrl = {
       res.status(500).json({ err: err });
     }
   },
-  deleteMessage: async (req, res) => {
+  deleteMessage: async(req, res) => {
     let msgID = req.params.msgID;
     let roomID = req.params.roomID;
     try {
@@ -78,14 +78,14 @@ exports.socketCtrl = {
       if (chat.messagesArr.length < 1) {
         try {
           let owner = await UserModel.findById(chat.creatorID).populate({
-            path: "messages",
+            path: 'messages',
           });
           owner.messages = owner.messages.filter(
             (msg) => String(msg._id) !== String(chat._id)
           );
           await owner.save();
           let user = await UserModel.findById(req.tokenData._id).populate({
-            path: "messages",
+            path: 'messages',
           });
           user.messages = await user.messages.filter(
             (msg) => String(msg._id) !== String(chat._id)
@@ -102,17 +102,17 @@ exports.socketCtrl = {
       res.status(500).json({ err: err });
     }
   },
-  deleteChat: async (req, res) => {
+  deleteChat: async(req, res) => {
     let chatID = req.params.chatID;
     let chat = await MessageModel.findById(chatID);
     try {
       let user = await UserModel.findById(chat.userID).populate({
-        path: "messages",
+        path: 'messages',
       });
       user.messages = await user.messages.filter((msg) => msg._id !== chatID);
       await user.save();
       let owner = await UserModel.findById(chat.creatorID).populate({
-        path: "messages",
+        path: 'messages',
       });
       owner.messages = await owner.messages.filter((msg) => msg._id !== chatID);
       await owner.save();

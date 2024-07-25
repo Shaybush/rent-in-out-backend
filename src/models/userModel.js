@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const cloudinary = { url: String, img_id: String };
 const rank = {
@@ -15,25 +15,25 @@ const userSchema = new mongoose.Schema({
   password_changed: Date,
   phone: String,
   profile_img: {
-      type: cloudinary,
-      default: {
-        url: "https://upload.wikimedia.org/wikipedia/commons/4/41/Blank_Earth_Banner.jpg",
-        img_id: "",
-      },
+    type: cloudinary,
+    default: {
+      url: 'https://upload.wikimedia.org/wikipedia/commons/4/41/Blank_Earth_Banner.jpg',
+      img_id: '',
+    },
   },
   cover_img: {
-      type: cloudinary,
-      default: {
-        url: "https://upload.wikimedia.org/wikipedia/commons/4/41/Blank_Earth_Banner.jpg",
-        img_id: "",
-      },
+    type: cloudinary,
+    default: {
+      url: 'https://upload.wikimedia.org/wikipedia/commons/4/41/Blank_Earth_Banner.jpg',
+      img_id: '',
+    },
   },
   country: String,
   city: String,
   birthdate: Date,
   role: {
     type: String,
-    default: "user",
+    default: 'user',
   },
   active: {
     type: Boolean,
@@ -49,11 +49,11 @@ const userSchema = new mongoose.Schema({
   },
   wishList: {
     type: [mongoose.Types.ObjectId],
-    ref: "posts",
+    ref: 'posts',
   },
   messages: {
     type: [mongoose.Types.ObjectId],
-    ref: "messages"
+    ref: 'messages'
   },
   createdAt: {
     type: Number,
@@ -65,4 +65,4 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-exports.UserModel = mongoose.model("users", userSchema);
+exports.UserModel = mongoose.model('users', userSchema);

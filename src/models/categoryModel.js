@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const Joi = require("joi");
+const mongoose = require('mongoose');
+const Joi = require('joi');
 
 const categorySchema = new mongoose.Schema({
   name: String,
@@ -15,12 +15,12 @@ const categorySchema = new mongoose.Schema({
   },
   creator_id: {
     type: mongoose.Types.ObjectId,
-    ref: "users",
+    ref: 'users',
   },
   editor_id: {
     type: mongoose.Types.ObjectId,
-    ref: "users",
+    ref: 'users',
   },
 });
 
-exports.CategoryModel = mongoose.model("categories", categorySchema);
+exports.CategoryModel = mongoose.model('categories', categorySchema);

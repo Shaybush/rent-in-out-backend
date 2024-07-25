@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
 const cloudinary = { url: String, img_id: String };
 const postSchema = new mongoose.Schema({
@@ -10,22 +10,22 @@ const postSchema = new mongoose.Schema({
   },
   range: {
     type: String,
-    enum: ["long-term", "short-term"],
-    default: "short-term",
+    enum: ['long-term', 'short-term'],
+    default: 'short-term',
   },
   creator_id: {
     type: mongoose.Types.ObjectId ,
-    ref: "users"
-},
+    ref: 'users'
+  },
   category_url: {
     type: String,
-    default: "skate",
+    default: 'skate',
   },
   price: Number,
   type: {
     type: String,
-    enum: ["rent", "exchange", "delivery"],
-    default: "rent",
+    enum: ['rent', 'exchange', 'delivery'],
+    default: 'rent',
   },
   collect_points:[],
   active: {
@@ -41,7 +41,7 @@ const postSchema = new mongoose.Schema({
   category_url: String,
   likes: {
     type: [mongoose.Types.ObjectId],
-    ref: "users",
+    ref: 'users',
   },
   createdAt: {
     type: Number,
@@ -53,4 +53,4 @@ const postSchema = new mongoose.Schema({
   },
 });
 
-exports.PostModel = mongoose.model("posts", postSchema);
+exports.PostModel = mongoose.model('posts', postSchema);

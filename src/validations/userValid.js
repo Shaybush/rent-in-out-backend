@@ -1,4 +1,4 @@
-const Joi = require("joi");
+const Joi = require('joi');
 
 exports.validateUser = (_reqBody) => {
   let joiSchema = Joi.object({
@@ -12,12 +12,12 @@ exports.validateUser = (_reqBody) => {
     birthdate: Joi.date().required(),
     country: Joi.string().min(2).max(99).required(),
     city: Joi.string().min(2).max(99).required(),
-    profile_img : Joi.object().allow(null,""),
-    cover_img : Joi.object().allow(null,"")
+    profile_img : Joi.object().allow(null,''),
+    cover_img : Joi.object().allow(null,'')
   });
   return joiSchema.validate(_reqBody);
 };
- 
+
 
 exports.validateUserLogin = (_reqBody) => {
   let joiSchema = Joi.object({
