@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const cloudinary = { url: String, img_id: String };
 const postSchema = new mongoose.Schema({
@@ -38,7 +38,6 @@ const postSchema = new mongoose.Schema({
   },
   country: String,
   city: String,
-  category_url: String,
   likes: {
     type: [mongoose.Types.ObjectId],
     ref: 'users',
@@ -53,4 +52,4 @@ const postSchema = new mongoose.Schema({
   },
 });
 
-exports.PostModel = mongoose.model('posts', postSchema);
+export const PostModel = mongoose.model('posts', postSchema);

@@ -1,4 +1,4 @@
-const { UserModel } = require('../models/userModel');
+import { UserModel } from '../models/userModel';
 const { config } = require('../config/config');
 const { validateUser } = require('../validations/userValid');
 const { createToken, select } = require('../helpers/userHelper');

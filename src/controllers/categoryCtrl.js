@@ -1,5 +1,5 @@
 const { select } = require('../helpers/userHelper');
-const { CategoryModel } = require('../models/categoryModel');
+import { CategoryModel } from '../models/categoryModel';
 const { validateCategory } = require('../validations/categoryValid');
 const MAX = 10000000;
 const MIN = 0;

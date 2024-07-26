@@ -1,10 +1,11 @@
 import tseslint from '@typescript-eslint/eslint-plugin';
+import tseslintPrefer from 'eslint-plugin-prefer-import';
 import parser from '@typescript-eslint/parser';
 
 
 export default [
   {
-    files: ['**/*.{js,mjs,cjs,ts}'],
+    files: ['src/**/*.ts'],
     languageOptions: {
       parser,
       parserOptions: {
@@ -14,11 +15,9 @@ export default [
         // tsconfigRootDir: __dirname,
       },
     },
-    ignorePatterns: [
-      'index.d.ts'
-    ],
     plugins: {
       '@typescript-eslint': tseslint,
+      'prefer-import': tseslintPrefer,
     },
     rules: {
       // Avoid redundant spaces
@@ -28,9 +27,10 @@ export default [
       'space-before-blocks': ['error', 'always'],
       'space-before-function-paren': ['error', 'never'],
       'spaced-comment': ['error', 'always', { 'exceptions': ['-', '+'] }],
+      'prefer-import/prefer-import-over-require': 'error',
 
       // Other necessary rules
-      'no-unused-vars': 'error',
+      // 'no-unused-vars': 'error',
       'eqeqeq': ['error', 'always'],
       'curly': 'error',
       'semi': ['error', 'always'],

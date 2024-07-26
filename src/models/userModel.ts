@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const cloudinary = { url: String, img_id: String };
 const rank = {
@@ -65,4 +65,4 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-exports.UserModel = mongoose.model('users', userSchema);
+export const UserModel = mongoose.model('users', userSchema);

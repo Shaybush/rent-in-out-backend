@@ -1,5 +1,6 @@
 
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
+
 const messageObj ={
   sender: String,
   userName:String,
@@ -17,4 +18,4 @@ const messageSchema = new mongoose.Schema({
   messagesArr:[messageObj]
 } , { timestamps: true });
 
-exports.MessageModel = mongoose.model('messages', messageSchema);
+export const MessageModel = mongoose.model('messages', messageSchema);

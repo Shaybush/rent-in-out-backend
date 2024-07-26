@@ -4,7 +4,7 @@
     "js/ts.implicitProjectConfig.checkJs": true,
     // "eslint.options": { "overrideConfigFile": "./.eslintrc.json" },
     "editor.codeActionsOnSave": {
-      "source.fixAll.eslint": "explicit",
+      "source.fixAll.eslint": "always",
       "source.addMissingImports": "never"
     },
     "editor.defaultFormatter": "esbenp.prettier-vscode",

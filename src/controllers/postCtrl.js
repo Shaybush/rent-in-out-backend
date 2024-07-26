@@ -1,8 +1,8 @@
 const { config } = require('../config/config');
 const { checkUndefinedOrNull } = require('../helpers/functions');
 const { select } = require('../helpers/userHelper');
-const { PostModel } = require('../models/postModel');
-const { UserModel } = require('../models/userModel');
+import { PostModel } from '../models/postModel';
+import { UserModel } from '../models/userModel';
 const { validatePost } = require('../validations/postValid');
 const cloudinary = require('cloudinary').v2;
 const MAX = 10000000;
