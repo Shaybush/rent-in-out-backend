@@ -1,5 +1,5 @@
-const { MessageModel } = require('../models/messageModel');
-const { UserModel } = require('../models/userModel');
+import { MessageModel } from '../models/messageModel';
+import UserModel from '../models/userModel';
 
 exports.socketCtrl = {
   chatUpdate: async(req, res) => {

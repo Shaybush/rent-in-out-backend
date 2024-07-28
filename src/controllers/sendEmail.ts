@@ -1,10 +1,8 @@
-import { Request, Response } from "express";
+import { Request, Response } from 'express';
+import { config } from '../config/config';
+import nodemailer from 'nodemailer';
 
-const { config } = require('../config/config');
-const nodemailer = require('nodemailer');
-// const { mailOptions } = require("../helpers/userHelper");
-
-let transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 465,
   secure: true,
@@ -14,23 +12,22 @@ let transporter = nodemailer.createTransport({
   }
 });
 
-let mailOptions = (_email , _subject , _html) => {
-  const mailOptions = {
+const mailOptions = (_email: string , _subject: string , _html: string) => {
+  return {
     from: config.gmailUser,
     to: config.gmailUser,
     subject: _subject,
     html: _html
   };
-  return mailOptions;
 };
+
 exports.mailMe = {
   sendEmail: async(req: Request, res: Response) => {
-    req.asd;
     let subject = 'mail send from ' + req.body.phone;
     let htmlMessage = `<div color:danger> <h2>${req.body.firstName} - ${req.body.lastName}</h2> <span>${req.body.phone}</span> | <span>${req.body.email}</span> <p>${req.body.textarea}</p> </div>`;
     const email = mailOptions(req.body.email, subject, htmlMessage);
     try {
-      transporter.sendMail(email, (err, info) => {
+      transporter.sendMail(email, () => {
         res.json({
           status: 'send',
           message: 'The message sent successfully'
@@ -39,7 +36,7 @@ exports.mailMe = {
       });
     }
     catch (err) {
-      return res.json({ err: 'There was a problem' });
+      return res.json({ err: 'There was an issue.' });
     }
   }
 };

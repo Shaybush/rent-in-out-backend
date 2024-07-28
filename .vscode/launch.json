@@ -7,7 +7,7 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "nodemon",
-      "program": "app.js",
+      "program": "src/app.ts",
       "restart": true,
       "outputCapture": "std",
       "sourceMaps": true,

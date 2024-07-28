@@ -1,5 +1,4 @@
-const mongoose = require('mongoose');
-const Joi = require('joi');
+import mongoose from 'mongoose';
 
 const categorySchema = new mongoose.Schema({
   name: String,
@@ -23,4 +22,4 @@ const categorySchema = new mongoose.Schema({
   },
 });
 
-exports.CategoryModel = mongoose.model('categories', categorySchema);
+export const CategoryModel = mongoose.model('categories', categorySchema);

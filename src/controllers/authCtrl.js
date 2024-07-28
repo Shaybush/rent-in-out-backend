@@ -1,14 +1,14 @@
 const { validateUser, validateUserLogin } = require('../validations/userValid');
 const bcrypt = require('bcrypt');
-const { UserModel } = require('../models/userModel');
+import { UserModel } from '../models/userModel';
 const {
   sendResetEmail,
   sendVerificationEmail,
   createToken,
 } = require('../helpers/userHelper');
-const { UserVerificationModel } = require('../models/userVerificationModel');
+import { UserVerificationModel } from '../models/userVerificationModel';
 const path = require('path');
-const { PasswordReset } = require('../models/passwordReset');
+import { PasswordReset } from '../models/passwordReset';
 const {
   getUserDetailFromAccessToken,
 } = require('../helpers/services/axiosService');

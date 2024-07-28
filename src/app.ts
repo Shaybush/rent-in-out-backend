@@ -1,17 +1,16 @@
 import { Request, Response } from 'express';
 
-const express = require('express');
-const path = require('path');
-const http = require('http');
-const cors = require('cors');
-const { Server } = require('socket.io');
-const session = require('express-session');
-const fileUpload = require('express-fileupload');
-const { routesInit } = require('./routers/config_routes');
-const { sockets } = require('./routers/socket');
-
-require('dotenv').config();
-require('./db/mongoconnect');
+import express from 'express';
+import path from 'path';
+import http from 'http';
+import cors from 'cors';
+import { Server } from 'socket.io';
+import session from 'express-session';
+import fileUpload from 'express-fileupload';
+import { routesInit } from './routers/config_routes';
+import { sockets } from './routers/socket';
+import 'dotenv/config';
+import './db/mongoconnect';
 
 const app = express();
 

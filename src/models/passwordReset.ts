@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 let PasswordResetSchema = new mongoose.Schema({
   userId: String,
@@ -7,4 +7,4 @@ let PasswordResetSchema = new mongoose.Schema({
   expiresAt: { type: Date, default: new Date(Date.now() + 3 * 60 * 60 * 1000)},
 });
 
-exports.PasswordReset = mongoose.model('PasswordReset', PasswordResetSchema);
+export const PasswordReset = mongoose.model('PasswordReset', PasswordResetSchema);
