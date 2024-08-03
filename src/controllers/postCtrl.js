@@ -3,13 +3,13 @@ const { checkUndefinedOrNull } = require('../helpers/functions');
 const { select } = require('../helpers/userHelper');
 import { PostModel } from '../models/postModel';
 import { UserModel } from '../models/userModel';
-const { validatePost } = require('../validations/postValid');
+import { validatePost } from '../validations/postValid'
 const cloudinary = require('cloudinary').v2;
 const MAX = 10000000;
 const MIN = 0;
 
 exports.postCtrl = {
-  getAll: async(req, res) => {
+  getAll: async (req, res) => {
     let perPage = Math.min(req.query.perPage, 20) || 15;
     let page = req.query.page || 1;
     let sort = req.query.sort || 'createdAt';
@@ -26,7 +26,7 @@ exports.postCtrl = {
       res.status(500).json({ err: err });
     }
   },
-  postByID: async(req, res) => {
+  postByID: async (req, res) => {
     let postID = req.params.postID;
     try {
       const post = await PostModel.findById(postID).populate({
@@ -38,7 +38,7 @@ exports.postCtrl = {
       res.status(500).json({ err: 'cannot find the post..' });
     }
   },
-  upload: async(req, res) => {
+  upload: async (req, res) => {
     let validBody = validatePost(req.body);
     if (validBody.error) {
       return res.status(400).json(validBody.error.details);
@@ -56,7 +56,7 @@ exports.postCtrl = {
       res.status(500).json({ err: err });
     }
   },
-  update: async(req, res) => {
+  update: async (req, res) => {
     try {
       let postID = req.params.postID;
       let data;
@@ -80,7 +80,7 @@ exports.postCtrl = {
       res.status(400).json({ err });
     }
   },
-  delete: async(req, res) => {
+  delete: async (req, res) => {
     let postID = req.params.postID;
     // cloudinary details to destroy post
     let details = {
@@ -96,7 +96,7 @@ exports.postCtrl = {
     const deleteCloudinaryImages = () => {
       post.img.forEach((img) => {
         cloudinary.uploader.destroy(img.img_id, details, (error, result) => {
-          if (error) {return res.json({ error });}
+          if (error) { return res.json({ error }); }
         });
       });
     };
@@ -126,7 +126,7 @@ exports.postCtrl = {
       res.status(400).json({ err });
     }
   },
-  countAll: async(req, res) => {
+  countAll: async (req, res) => {
     try {
       let count = await PostModel.countDocuments({});
       res.json({ count });
@@ -134,7 +134,7 @@ exports.postCtrl = {
       res.status(500).json({ msg: 'err', err });
     }
   },
-  countMyPosts: async(req, res) => {
+  countMyPosts: async (req, res) => {
     try {
       let count = await PostModel.countDocuments({
         creator_id: req.tokenData._id,
@@ -144,7 +144,7 @@ exports.postCtrl = {
       res.status(500).json({ msg: 'err', err });
     }
   },
-  search: async(req, res) => {
+  search: async (req, res) => {
     let perPage = Math.min(req.query.perPage, 20) || 15;
     let page = req.query.page || 1;
     let sort = req.query.sort || 'createdAt';
@@ -188,7 +188,7 @@ exports.postCtrl = {
       res.status(500).json({ err: err });
     }
   },
-  changeActive: async(req, res) => {
+  changeActive: async (req, res) => {
     try {
       let postID = req.params.postID;
       if (postID == config.superID) {
@@ -206,7 +206,7 @@ exports.postCtrl = {
       res.status(500).json({ msg: 'err', err });
     }
   },
-  userPosts: async(req, res) => {
+  userPosts: async (req, res) => {
     let perPage = Math.min(req.query.perPage, 20) || 10;
     let page = req.query.page || 1;
     let sort = req.query.sort || 'createdAt';
@@ -223,7 +223,7 @@ exports.postCtrl = {
       res.status(500).json({ err: err });
     }
   },
-  changeRange: async(req, res) => {
+  changeRange: async (req, res) => {
     if (!req.body.range && req.body.range != false) {
       return res.status(400).json({ msg: 'Need to send range in body' });
     }
@@ -258,7 +258,7 @@ exports.postCtrl = {
       res.status(500).json({ msg: 'err', err });
     }
   },
-  likePost: async(req, res) => {
+  likePost: async (req, res) => {
     // find user by id
     let user = await UserModel.findById(req.tokenData._id);
     // get post from query params
@@ -298,7 +298,7 @@ exports.postCtrl = {
     await user.save();
     res.status(201).json({ posts: post.likes, msg: 'unlike the post' });
   },
-  countLikes: async(req, res) => {
+  countLikes: async (req, res) => {
     try {
       let postID = req.params.postID;
       let post = await PostModel.findOne({ _id: postID });
@@ -308,7 +308,7 @@ exports.postCtrl = {
       res.status(500).json({ msg: 'err', err });
     }
   },
-  topThreeLikes: async(req, res) => {
+  topThreeLikes: async (req, res) => {
     try {
       let postID = req.params.postID;
       let post = await PostModel.findOne({ _id: postID });
@@ -317,7 +317,7 @@ exports.postCtrl = {
       res.status(500).json({ msg: 'err', err });
     }
   },
-  onCancelDel: async(req, res) => {
+  onCancelDel: async (req, res) => {
     let images = req.body;
     let details = {
       cloud_name: config.cloudinary_post_name,
@@ -328,7 +328,7 @@ exports.postCtrl = {
     try {
       images.forEach((img) => {
         cloudinary.uploader.destroy(img.img_id, details, (error, result) => {
-          if (error) {return res.json({ error });}
+          if (error) { return res.json({ error }); }
         });
       });
       return res.json({ msg: 'delete all images succeed' });
@@ -336,7 +336,7 @@ exports.postCtrl = {
       res.status(500).json({ msg: 'err', err });
     }
   },
-  singlePostImgDelete: async(req, res) => {
+  singlePostImgDelete: async (req, res) => {
     let { postID, imgID } = req.params;
     let details = {
       cloud_name: config.cloudinary_post_name,
@@ -350,11 +350,11 @@ exports.postCtrl = {
     });
     await post.save();
     cloudinary.uploader.destroy(imgID, details, (error, result) => {
-      if (error) {return res.json({ error });}
+      if (error) { return res.json({ error }); }
     });
     return res.json({ msg: 'delete all images succeed' });
   },
-  countByCategory: async(req, res) => {
+  countByCategory: async (req, res) => {
     try {
       const countMap = {};
       let posts = await PostModel.find({});

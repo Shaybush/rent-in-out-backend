@@ -1,4 +1,4 @@
-const { validateUser, validateUserLogin } = require('../validations/userValid');
+import { validateUser, validateUserLogin } from '../validations/userValid';
 const bcrypt = require('bcrypt');
 import { UserModel } from '../models/userModel';
 const {
@@ -17,7 +17,7 @@ require('dotenv').config();
 const saltRounds = 10;
 
 exports.authCtrl = {
-  signUp: async(req, res) => {
+  signUp: async (req, res) => {
     let validBody = validateUser(req.body);
     if (validBody.error) {
       return res.status(400).json({ Messege: validBody.error.details });
@@ -43,18 +43,17 @@ exports.authCtrl = {
       res.status(500).json({ msg: 'err', err });
     }
   },
-  login: async(req, res) => {
-    if (req.body.token) {return this.authCtrl.loginGmail(req, res);}
+  login: async (req, res) => {
+    if (req.body.token) { return this.authCtrl.loginGmail(req, res); }
     const validBody = validateUserLogin(req.body);
-    if (validBody.error)
-    {return res.status(401).json({ msg: validBody.error.details });}
+    if (validBody.error) { return res.status(401).json({ msg: validBody.error.details }); }
     try {
       const user = await UserModel.findOne({
         email: req.body.email.toLowerCase(),
       });
-      if (!user) {return res.status(401).json({ msg: 'User not found' });}
+      if (!user) { return res.status(401).json({ msg: 'User not found' }); }
       const validPass = await bcrypt.compare(req.body.password, user.password);
-      if (!validPass) {return res.status(401).json({ msg: 'Invalid password' });}
+      if (!validPass) { return res.status(401).json({ msg: 'Invalid password' }); }
 
       const { active } = user;
       if (!active) {
@@ -69,7 +68,7 @@ exports.authCtrl = {
     }
   },
 
-  verifyUser: async(req, res) => {
+  verifyUser: async (req, res) => {
     let { userId, uniqueString } = req.params;
     try {
       const user = await UserVerificationModel.findOne({ userId });
@@ -145,10 +144,10 @@ exports.authCtrl = {
       res.redirect(`/users/verified/?error=true&message=${message}`);
     }
   },
-  verifiedUser: async(req, res) => {
+  verifiedUser: async (req, res) => {
     res.sendFile(path.join(__dirname, '../views/verified.html'));
   },
-  requestPasswordReset: async(req, res) => {
+  requestPasswordReset: async (req, res) => {
     const { email, redirectUrl } = req.body;
     UserModel.findOne({ email }).then((data) => {
       if (data) {
@@ -171,7 +170,7 @@ exports.authCtrl = {
       }
     });
   },
-  resetPassword: async(req, res) => {
+  resetPassword: async (req, res) => {
     const { userId, resetString, newPassword } = req.body;
     try {
       let result = await PasswordReset.findOne({ userId });
@@ -235,7 +234,7 @@ exports.authCtrl = {
     }
   },
   // Gmail controllers
-  loginGmail: async(req, res) => {
+  loginGmail: async (req, res) => {
     try {
       let google_email;
       const google_token = req.body.token;
@@ -251,7 +250,7 @@ exports.authCtrl = {
       const user = await UserModel.findOne({
         email: google_email,
       });
-      if (!user) {return res.status(401).json({ msg: 'User not found' });}
+      if (!user) { return res.status(401).json({ msg: 'User not found' }); }
 
       const { active } = user;
       if (!active) {

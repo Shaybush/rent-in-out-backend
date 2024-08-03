@@ -1,11 +1,11 @@
 const { select } = require('../helpers/userHelper');
 import { CategoryModel } from '../models/categoryModel';
-const { validateCategory } = require('../validations/categoryValid');
+import { validateCategory } from '../validations/categoryValid';
 const MAX = 10000000;
 const MIN = 0;
 
 exports.categoryCtrl = {
-  getCategorylist: async(req, res) => {
+  getCategorylist: async (req, res) => {
     let sort = req.query.sort || 'name';
     let reverse = req.query.reverse == 'yes' ? -1 : 1;
     try {
@@ -18,7 +18,7 @@ exports.categoryCtrl = {
       return res.status(500).json({ msg: 'there error try again later', err });
     }
   },
-  search: async(req, res) => {
+  search: async (req, res) => {
     let perPage = Math.min(req.query.perPage, 20) || 10;
     let page = req.query.page || 1;
     let sort = req.query.sort || 'createdAt';
@@ -47,7 +47,7 @@ exports.categoryCtrl = {
     }
   },
 
-  addCategory: async(req, res) => {
+  addCategory: async (req, res) => {
     let validBody = validateCategory(req.body);
     if (validBody.error) {
       res.status(400).json(validBody.error.details);
@@ -72,7 +72,7 @@ exports.categoryCtrl = {
     }
   },
 
-  editCategory: async(req, res) => {
+  editCategory: async (req, res) => {
     let validBody = validateCategory(req.body);
     if (validBody.error) {
       res.status(400).json(validBody.error.details);
@@ -91,7 +91,7 @@ exports.categoryCtrl = {
     }
   },
 
-  deleteCategory: async(req, res) => {
+  deleteCategory: async (req, res) => {
     try {
       let idDel = req.params.idDel;
       let data = await CategoryModel.deleteOne({ _id: idDel });
@@ -101,7 +101,7 @@ exports.categoryCtrl = {
       res.status(500).json({ msg: 'err', err });
     }
   },
-  count: async(req, res) => {
+  count: async (req, res) => {
     try {
       let count = await CategoryModel.countDocuments({});
       res.json({ count });
