@@ -1,14 +1,14 @@
 import { UserModel } from '../models/userModel';
+import { validateUser } from '../validations/userValid';
 const { config } = require('../config/config');
-const { validateUser } = require('../validations/userValid');
 const { createToken, select } = require('../helpers/userHelper');
 const cloudinary = require('cloudinary').v2;
 
 exports.userCtrl = {
-  checkToken: async(req, res) => {
+  checkToken: async (req, res) => {
     res.json(req.tokenData);
   },
-  infoById: async(req, res) => {
+  infoById: async (req, res) => {
     try {
       let id = req.params.id;
       let userInfo = await UserModel.findOne(
@@ -27,7 +27,7 @@ exports.userCtrl = {
       return res.status(500).json({ msg: 'err', err });
     }
   },
-  infoByIdWithToken: async(req, res) => {
+  infoByIdWithToken: async (req, res) => {
     try {
       let id = req.params.id;
       let userInfo = await UserModel.findOne(
@@ -46,7 +46,7 @@ exports.userCtrl = {
       return res.status(500).json({ msg: 'err', err });
     }
   },
-  getUsersList: async(req, res) => {
+  getUsersList: async (req, res) => {
     let perPage = Math.min(req.query.perPage, 20) || 10;
     let page = req.query.page || 1;
     let sort = req.query.sort || 'role';
@@ -65,7 +65,7 @@ exports.userCtrl = {
       return res.status(500).json({ msg: 'err', err });
     }
   },
-  countUsers: async(req, res) => {
+  countUsers: async (req, res) => {
     try {
       let count = await UserModel.countDocuments({});
       res.json({ count });
@@ -75,7 +75,7 @@ exports.userCtrl = {
     }
   },
 
-  changeRole: async(req, res) => {
+  changeRole: async (req, res) => {
     try {
       let userID = req.params.userID;
       if (userID == config.superID) {
@@ -97,7 +97,7 @@ exports.userCtrl = {
     }
   },
 
-  changeActive: async(req, res) => {
+  changeActive: async (req, res) => {
     try {
       let userID = req.params.userID;
       if (userID == config.superID) {
@@ -119,7 +119,7 @@ exports.userCtrl = {
     }
   },
 
-  delete: async(req, res) => {
+  delete: async (req, res) => {
     try {
       let idDel = req.params.idDel;
       let userInfo;
@@ -140,7 +140,7 @@ exports.userCtrl = {
       res.status(500).json({ msg: 'err', err });
     }
   },
-  edit: async(req, res) => {
+  edit: async (req, res) => {
     let userValid = validateUser(req.body);
     if (!userValid) {
       return res.status(400).json({ msg: 'Need to send valid body' });
@@ -170,14 +170,13 @@ exports.userCtrl = {
       return res.status(500).json({ msg: 'err', err });
     }
   },
-  rankUser: async(req, res) => {
+  rankUser: async (req, res) => {
     let rankedUserId = req.params.userID;
     const rnk = req.body.rnk;
     if (rnk > 5) {
       return res.status(401).json({ msg: 'Cant rank more than 5' });
     }
-    if (rankedUserId === req.tokenData._id)
-    {return res.status(401).json({ msg: 'You can\'t rank yourself' });}
+    if (rankedUserId === req.tokenData._id) { return res.status(401).json({ msg: 'You can\'t rank yourself' }); }
     try {
       let user = await UserModel.findOne({
         $and: [{ _id: rankedUserId }, { _id: { $ne: req.tokenData._id } }],
@@ -189,7 +188,7 @@ exports.userCtrl = {
         res.status(201).json({ msg: 'rank succeed' });
       } else {
         user.rank.map((el) => {
-          if (el.user_id === req.tokenData._id) {el.rank = rnk;}
+          if (el.user_id === req.tokenData._id) { el.rank = rnk; }
         });
         await user.save();
         return res.status(201).json({ msg: 'rank override succeed' });
@@ -201,14 +200,14 @@ exports.userCtrl = {
         .json({ msg: 'Not possible to rank at this time', err });
     }
   },
-  avgRank: async(req, res) => {
+  avgRank: async (req, res) => {
     let rankedUserId = req.params.userID;
     let rankingUser = req.query?.rankingUser;
     try {
       let user = await UserModel.findOne({ _id: rankedUserId });
       let userRanked = user.rank.find((el) => el.user_id === rankingUser);
       let userRank = 0;
-      if (userRanked) {user.rank.userRank = userRanked.rank;}
+      if (userRanked) { user.rank.userRank = userRanked.rank; }
       let ranks = user.rank.map((el) => el.rank);
       const average = ranks.reduce((a, b) => a + b, 0) / ranks.length;
       return res.status(200).json({ average, userRank: user.rank.userRank });
@@ -218,7 +217,7 @@ exports.userCtrl = {
         .json({ msg: 'Error occured try again later', err });
     }
   },
-  userSearch: async(req, res) => {
+  userSearch: async (req, res) => {
     let perPage = Math.min(req.query.perPage, 20) || 10;
     let page = req.query.page || 1;
     let sort = req.query.sort || 'role';
@@ -251,7 +250,7 @@ exports.userCtrl = {
       res.status(500).json({ err: err });
     }
   },
-  uploadImg: async(req, res) => {
+  uploadImg: async (req, res) => {
     let image = req.body;
 
     if (image) {
@@ -267,7 +266,7 @@ exports.userCtrl = {
       res.status(404).json({ err: 'Must send an image' });
     }
   },
-  uploadBanner: async(req, res) => {
+  uploadBanner: async (req, res) => {
     let banner = req.body;
     if (banner) {
       try {
@@ -282,7 +281,7 @@ exports.userCtrl = {
       res.status(404).json({ err: 'Must send an banner' });
     }
   },
-  profileImgDelete: async(req, res) => {
+  profileImgDelete: async (req, res) => {
     let id = req.query.id;
     let details = {
       cloud_name: config.cloudinary_profile_name,
@@ -291,11 +290,11 @@ exports.userCtrl = {
       type: 'upload',
     };
     cloudinary.uploader.destroy(id, details, (error, result) => {
-      if (error) {return res.json({ error });}
+      if (error) { return res.json({ error }); }
       return res.json({ result });
     });
   },
-  bannerImgDelete: async(req, res) => {
+  bannerImgDelete: async (req, res) => {
     let id = req.query.id;
     let details = {
       cloud_name: config.cloudinary_banner_name,
@@ -304,12 +303,12 @@ exports.userCtrl = {
       type: 'upload',
     };
     cloudinary.uploader.destroy(id, details, (error, result) => {
-      if (error) {return res.json({ error });}
+      if (error) { return res.json({ error }); }
       return res.json({ result });
     });
   },
 
-  getUserWishList: async(req, res) => {
+  getUserWishList: async (req, res) => {
     let user = await UserModel.findOne({ _id: req.tokenData._id })
       .populate({
         path: 'wishList',
@@ -320,12 +319,12 @@ exports.userCtrl = {
         populate: { path: 'likes', select },
       });
     try {
-      let wishList = user.wishList.sort(function(a, b) {
+      let wishList = user.wishList.sort(function (a, b) {
         var keyA = new Date(a.updatedAt),
           keyB = new Date(b.updatedAt);
         // Compare the 2 dates
-        if (keyA > keyB) {return -1;}
-        if (keyA < keyB) {return 1;}
+        if (keyA > keyB) { return -1; }
+        if (keyA < keyB) { return 1; }
         return 0;
       });
       return res.status(200).json(wishList);
@@ -333,7 +332,7 @@ exports.userCtrl = {
       res.status(500).json({ err: err });
     }
   },
-  getUsersCountByDate: async(req, res) => {
+  getUsersCountByDate: async (req, res) => {
     let data = await UserModel.find(
       { _id: { $ne: config.superID } },
       { password: 0 }
