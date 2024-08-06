@@ -39,6 +39,10 @@ app.use(session({ secret: 'cats' }));
 app.use(express.static(path.join(__dirname, 'public')));
 routesInit(app);
 
+app.use((req: Request, res: Response) => {
+  console.log(req.baseUrl, req.originalUrl);
+});
+
 const server = http.createServer(app);
 // socket io
 const io = new Server(server, {

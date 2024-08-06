@@ -8,11 +8,12 @@ const jwt = require('jsonwebtoken');
 
 const saltRounds = 10;
 // populate creator filter
-exports.select = {'_id':1 , 'fullName':1 , 'email' :1 ,'profile_img':1 , 'country' :1 ,'city':1 , 'phone' :1, 'createdAt': 1, 'likes': 1 };
-exports.createToken = (_id, role) =>{
+export const select = {'_id':1 , 'fullName':1 , 'email' :1 ,'profile_img':1 , 'country' :1 ,'city':1 , 'phone' :1, 'createdAt': 1, 'likes': 1 };
+export const createToken = (_id, role) =>{
   let token = jwt.sign({_id,role}, config.tokenSecret,{expiresIn:'15h'});
   return token;
 };
+
 // import email props
 let transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
@@ -35,7 +36,7 @@ const mailOptions = (_id='',_uniqueString='' ,_email , _subject , _html) => {
   return mailOptions;
 };
 
-exports.sendVerificationEmail = async({ _id, email }, res) => {
+export const sendVerificationEmail = async({ _id, email }, res) => {
   const uniqueString = uuidv4() + _id;
   const html =`<p>Verify Your Email </p><p> click <a href=${config.domain+'/users/verify/'+_id+'/'+uniqueString}> here</a></p>`;
 
@@ -70,7 +71,7 @@ exports.sendVerificationEmail = async({ _id, email }, res) => {
     });
 };
 // redirect url is an frontend url were we reset password
-exports.sendResetEmail = async({_id , email} , redirectUrl , res)=>{
+export const sendResetEmail = async({_id , email} , redirectUrl , res)=>{
   // if request already in system
   let request = await PasswordReset.findOne({_id});
   if(request) {await PasswordReset.deleteOne({_id});}

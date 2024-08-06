@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { IUser } from './interfaces/userInterface.interface';
 
 const cloudinary = { url: String, img_id: String };
 const rank = {
@@ -65,4 +66,4 @@ const userSchema = new mongoose.Schema({
   },
 });
 
-export const UserModel = mongoose.model('users', userSchema);
+export const UserModel = mongoose.model<IUser>('users', userSchema);

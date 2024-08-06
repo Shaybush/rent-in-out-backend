@@ -50,16 +50,16 @@ exports.socketCtrl = {
     } else {return res.status(404).json({ msg: 'Chat not found' });}
   },
   getUserChats: async(req, res) => {
-    let message = await UserModel.findOne({ _id: req.tokenData._id }).populate({
-      path: 'messages',
-    });
-    try {
-      let messages = message.messages.sort(function(a, b) {
+    try { 
+      let message = await UserModel.findOne({ _id: req.tokenData._id }).populate({
+        path: 'messages',
+      });
+      let messages = message.messages.sort(function(a, b) { 
         var keyA = new Date(a.updatedAt),
           keyB = new Date(b.updatedAt);
         // Compare the 2 dates
         if (keyA > keyB) {return -1;}
-        if (keyA < keyB) {return 1;}
+        if (keyA < keyB) {return 1;} 
         return 0;
       });
       return res.status(200).json(messages);

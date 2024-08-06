@@ -1,23 +1,19 @@
 import { validateUser, validateUserLogin } from '../validations/userValid';
-const bcrypt = require('bcrypt');
+import bcrypt from 'bcrypt';
 import { UserModel } from '../models/userModel';
-const {
-  sendResetEmail,
-  sendVerificationEmail,
-  createToken,
-} = require('../helpers/userHelper');
+import { sendResetEmail, sendVerificationEmail, createToken } from '../helpers/userHelper';
 import { UserVerificationModel } from '../models/userVerificationModel';
-const path = require('path');
+import path from 'path';
 import { PasswordReset } from '../models/passwordReset';
-const {
-  getUserDetailFromAccessToken,
-} = require('../helpers/services/axiosService');
-require('dotenv').config();
+import dotenv from 'dotenv';
+import { NextFunction, Request, Response } from 'express';
+import { IUserVerification } from '../models/interfaces/userVerification.interface';
 
+dotenv.config();
 const saltRounds = 10;
 
 exports.authCtrl = {
-  signUp: async (req, res) => {
+  signUp: async(req: Request, res: Response, _next:NextFunction) => {
     let validBody = validateUser(req.body);
     if (validBody.error) {
       return res.status(400).json({ Messege: validBody.error.details });
@@ -33,8 +29,8 @@ exports.authCtrl = {
       res.status(201).json({
         msg: `New user ${user.fullName.firstName} ${user.fullName.lastName} created!`,
       });
-    } catch (err) {
-      if (err.code == 11000) {
+    } catch (err: unknown) {
+      if (err instanceof Error && (err as any).code === 11000) {
         return res
           .status(409)
           .json({ msg: 'Email already in system, try log in', code: 11000 });
@@ -43,8 +39,7 @@ exports.authCtrl = {
       res.status(500).json({ msg: 'err', err });
     }
   },
-  login: async (req, res) => {
-    if (req.body.token) { return this.authCtrl.loginGmail(req, res); }
+  login: async(req: Request, res: Response, _next:NextFunction) => {
     const validBody = validateUserLogin(req.body);
     if (validBody.error) { return res.status(401).json({ msg: validBody.error.details }); }
     try {
@@ -67,17 +62,17 @@ exports.authCtrl = {
       return res.status(500).json({ msg: 'There was an error signing' });
     }
   },
-
-  verifyUser: async (req, res) => {
+  verifyUser: async(req: Request, res: Response, _next:NextFunction) => {
+    // TODO - check this function
     let { userId, uniqueString } = req.params;
     try {
-      const user = await UserVerificationModel.findOne({ userId });
+      const user = await UserVerificationModel.findOne({ userId }) as IUserVerification;
       // check if user exist in system
-      const { expiresAt } = user;
+      const expiresAt = user?.expiresAt;
       const hashedUniqueString = user.uniqueString;
       if (user) {
         // checkes if link expired and sent a messege, delete verify collection in db
-        if (expiresAt < Date.now() + 2 * 60 * 60 * 1000) {
+        if (expiresAt < (Date.now() + 2 * 60 * 60 * 1000)) {
           try {
             // if expired delete verify collection
             await UserVerificationModel.deleteOne({ userId });
@@ -144,46 +139,39 @@ exports.authCtrl = {
       res.redirect(`/users/verified/?error=true&message=${message}`);
     }
   },
-  verifiedUser: async (req, res) => {
+  verifiedUser: async(req: Request, res: Response, _next:NextFunction) => {
+    // TODO - check if possible just redirect
     res.sendFile(path.join(__dirname, '../views/verified.html'));
   },
-  requestPasswordReset: async (req, res) => {
+  requestPasswordReset: async(req: Request, res: Response, _next:NextFunction) => {
     const { email, redirectUrl } = req.body;
     UserModel.findOne({ email }).then((data) => {
       if (data) {
         // check if user is active
         if (!data.active) {
-          res.json({
-            status: 'failed',
-            message:
-              'Email isn\'t verified yet or account as been suspended, please check your email',
-          });
+          res.json({status: 'failed',message:'Email isn\'t verified yet or account as been suspended, please check your email'});
         } else {
           // procced to email reset pasword
           sendResetEmail(data, redirectUrl, res);
         }
       } else {
-        res.json({
-          status: 'failed',
-          message: 'No account with the supplied email found. Please try again',
-        });
+        res.json({status: 'failed', message: 'No account with the supplied email found. Please try again'});
       }
     });
   },
-  resetPassword: async (req, res) => {
+  resetPassword: async(req: Request, res: Response, _next:NextFunction) => {
+    // TODO - check if working
     const { userId, resetString, newPassword } = req.body;
     try {
       let result = await PasswordReset.findOne({ userId });
       if (result) {
-        const { expiresAt } = result;
-        const hashedResetString = result.resetString;
-        if (expiresAt < Date.now() + 2 * 60 * 60 * 1000) {
+        const expiresAt = result.expiresAt;
+        const hashedResetString = result.resetString as string;
+        if (expiresAt < (Date.now() + 2 * 60 * 60 * 1000)) {
           // checking if link expired
           let reset = await PasswordReset.deleteOne({ userId });
           if (!reset) {
-            return res
-              .status(401)
-              .json({ msg: 'Password reset link as expired', err });
+            return res.status(401).json({ msg: 'Password reset link as expired' });
           }
         } else {
           // compare reset string with string from db
@@ -211,9 +199,7 @@ exports.authCtrl = {
                     msg: 'Password reset successfully',
                   });
                 } else {
-                  return res
-                    .status(401)
-                    .json({ msg: 'Failed to update user password', error });
+                  return res.status(401).json({ msg: 'Failed to update user password' });
                 }
               }
             }
@@ -223,45 +209,12 @@ exports.authCtrl = {
         }
       } else {
         // password reset request not found
-        return res
-          .status(401)
-          .json({ msg: 'Password reset request not found' });
+        return res.status(401).json({ msg: 'Password reset request not found' });
       }
     } catch (error) {
       return res
         .status(500)
-        .json({ msg: 'Checking for existing password recors failed', err });
-    }
-  },
-  // Gmail controllers
-  loginGmail: async (req, res) => {
-    try {
-      let google_email;
-      const google_token = req.body.token;
-      // try to recieve google email from token
-      if (google_token) {
-        try {
-          const response = await getUserDetailFromAccessToken(google_token);
-          google_email = response.data?.email;
-        } catch (err) {
-          return res.status(500).json({ msg: 'Couldn\'t login google', err });
-        }
-      }
-      const user = await UserModel.findOne({
-        email: google_email,
-      });
-      if (!user) { return res.status(401).json({ msg: 'User not found' }); }
-
-      const { active } = user;
-      if (!active) {
-        return res
-          .status(401)
-          .json({ msg: 'User blocked/ need to verify your email' });
-      }
-      let newAccessToken = createToken(user._id, user.role);
-      return res.json({ token: newAccessToken, user });
-    } catch (err) {
-      return res.status(500).json({ msg: 'There was an error signing' });
+        .json({ msg: 'Checking for existing password recors failed', error });
     }
   },
 };

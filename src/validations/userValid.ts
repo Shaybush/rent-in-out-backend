@@ -6,7 +6,7 @@ interface IFullName {
   lastName: string;
 }
 
-interface IReqBodyUserModel {
+export interface IReqBodyUserModel {
   fullName: IFullName;
   email: string;
   password: string;
