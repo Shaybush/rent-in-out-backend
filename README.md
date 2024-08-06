@@ -4,11 +4,11 @@ Are you tired of the inconvenience of lugging around things you rarely use or mi
 
 Introducing RentApp, the ultimate solution for all your rental needs, whether it's a small tool for a DIY project or a thrilling adventure for the weekend.
 
-## Project Technologies - 
+### Project Technologies - 
 
 <img src="https://skillicons.dev/icons?i=express,nodejs,typescript,mongo,postman&perline=7&theme=light" />
 
-### Installation + Running The Application
+## Installation + Running The Application
 
 1. Clone the repository to your local machine:
    ```sh
