@@ -1,17 +1,17 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Response } from 'express';
 import { select } from '../helpers/userHelper';
-import { CategoryModel, ICategoryModel } from '../models/categoryModel';
+import { CategoryModel } from '../models/categoryModel';
 import { validateCategory } from '../validations/categoryValid';
-const MAX = 10000000;
-const MIN = 0;
+import { CustomRequest } from '../@types/request.types';
+import { SortOrder } from 'mongoose';
 
 exports.categoryCtrl = {
-	getCategorylist: async (req: Request, res: Response, _next: NextFunction) => {
-		let sort: keyof ICategoryModel = req.query.sort || 'name';
-		let reverse = req.query.reverse === 'yes' ? -1 : 1;
+	getCategorylist: async (req: CustomRequest, res: Response, _next: NextFunction) => {
+		let sort = req.query.sort || 'name';
+		let reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
 		try {
 			let data = await CategoryModel.find({})
-				.sort({ [sort]: reverse })
+				.sort([[sort, reverse]])
 				.populate({ path: 'creator_id', select })
 				.populate({ path: 'editor_id', select });
 			return res.json(data);
@@ -19,11 +19,11 @@ exports.categoryCtrl = {
 			return res.status(500).json({ msg: 'there error try again later', err });
 		}
 	},
-	search: async (req: Request, res: Response, _next: NextFunction) => {
-		let perPage = Math.min(req.query.perPage, 20) || 10;
-		let page = req.query.page || 1;
+	search: async (req: CustomRequest, res: Response, _next: NextFunction) => {
+		const perPage = Math.min(req.query.perPage || 10, 20);
+		const page = req.query.page || 1;
 		let sort = req.query.sort || 'createdAt';
-		let reverse = req.query.reverse === 'yes' ? -1 : 1;
+		let reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
 		try {
 			let searchQ = req.query?.s;
 			let searchReg = new RegExp(searchQ, 'i');
@@ -36,7 +36,7 @@ exports.categoryCtrl = {
 			})
 				.limit(perPage)
 				.skip((page - 1) * perPage)
-				.sort({ [sort]: reverse })
+				.sort([[sort, reverse]])
 				.populate({ path: 'creator_id', select })
 				.populate({ path: 'editor_id', select });
 			return res.json(category);
@@ -45,7 +45,7 @@ exports.categoryCtrl = {
 		}
 	},
 
-	addCategory: async (req: Request, res: Response, _next: NextFunction) => {
+	addCategory: async (req: CustomRequest, res: Response, _next: NextFunction) => {
 		let validBody = validateCategory(req.body);
 		if (validBody.error) {
 			res.status(400).json(validBody.error.details);
@@ -71,7 +71,7 @@ exports.categoryCtrl = {
 		}
 	},
 
-	editCategory: async (req: Request, res: Response, _next: NextFunction) => {
+	editCategory: async (req: CustomRequest, res: Response, _next: NextFunction) => {
 		let validBody = validateCategory(req.body);
 		if (validBody.error) {
 			res.status(400).json(validBody.error.details);
@@ -93,7 +93,7 @@ exports.categoryCtrl = {
 		}
 	},
 
-	deleteCategory: async (req: Request, res: Response, _next: NextFunction) => {
+	deleteCategory: async (req: CustomRequest, res: Response, _next: NextFunction) => {
 		try {
 			let idDel = req.params.idDel;
 			let data = await CategoryModel.deleteOne({ _id: idDel });
@@ -103,7 +103,7 @@ exports.categoryCtrl = {
 			res.status(500).json({ msg: 'err', err: error });
 		}
 	},
-	count: async (req: Request, res: Response, _next: NextFunction) => {
+	count: async (req: CustomRequest, res: Response, _next: NextFunction) => {
 		try {
 			let count = await CategoryModel.countDocuments({});
 			res.json({ count });

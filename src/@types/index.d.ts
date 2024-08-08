@@ -3,12 +3,11 @@ export {};
 declare global {
 	namespace Express {
 		interface Request {
+			_id: Types.ObjectId;
+
 			tokenData: {
-				_id: string;
-			};
-			query: {
-				perPage: number;
-				sort: string;
+				_id: Types.ObjectId;
+				role: string;
 			};
 		}
 	}
