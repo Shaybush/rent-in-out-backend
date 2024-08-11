@@ -1,6 +1,6 @@
 const express = require('express');
-const { authAdmin } = require('../middlewares/auth');
 const { categoryCtrl } = require('../controllers/categoryCtrl');
+import { authAdmin } from '../middlewares/auth';
 const router = express.Router();
 
 router.get('/', categoryCtrl.getCategorylist);

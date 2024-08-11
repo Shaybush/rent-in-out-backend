@@ -48,7 +48,6 @@ module.exports = {
 
 		// Node.js and CommonJS
 		'global-require': 'warn', // Enforces require() on the top-level module scope
-		'handle-callback-err': 'warn', // Requires error handling in callbacks
 		'no-mixed-requires': ['warn', { grouping: true, allowCall: true }], // Disallows mixing regular variable declarations with require
 		'no-new-require': 'error', // Disallows new require
 		'no-path-concat': 'error', // Disallows string concatenation with __dirname and __filename
