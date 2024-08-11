@@ -1,6 +1,6 @@
 const express = require('express');
-const { auth, authAdmin } = require('../middlewares/auth');
 const { postCtrl } = require('../controllers/postCtrl');
+import { auth, authAdmin } from '../middlewares/auth';
 const router = express.Router();
 // CRUD
 
@@ -27,6 +27,4 @@ router.post('/onCancelImgDel', auth, postCtrl.onCancelDel);
 router.patch('/changeRange/:postID', auth, postCtrl.changeRange);
 router.patch('/changeActive/:postID', authAdmin, postCtrl.changeActive);
 
-
 module.exports = router;
-
