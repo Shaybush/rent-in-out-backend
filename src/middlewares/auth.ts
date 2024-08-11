@@ -1,8 +1,9 @@
 import jwt from 'jsonwebtoken';
 import { config } from '../config/config';
 import { NextFunction, Request, Response } from 'express';
+import { CustomRequest } from '../@types/request.types';
 
-export const auth = (req: any, res: Response, next: NextFunction) => {
+export const auth = (req: CustomRequest, res: Response, next: NextFunction) => {
 	let token = req.header('x-api-key');
 	if (!token) {
 		return res.status(401).json({ msg: 'please send token this end point url ' });
@@ -16,6 +17,8 @@ export const auth = (req: any, res: Response, next: NextFunction) => {
 	}
 };
 
+// TODO - I declare here req as any becuase there is an error make a placement of variable in req, example: req.tokenData = decodeToken; (Error) !
+// Improve it later
 export const authAdmin = (req: any, res: Response, next: NextFunction) => {
 	let token = req.header('x-api-key');
 	if (!token) {

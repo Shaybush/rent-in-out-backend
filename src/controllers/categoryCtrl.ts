@@ -1,13 +1,13 @@
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { select } from '../helpers/userHelper';
 import { CategoryModel } from '../models/categoryModel';
 import { validateCategory } from '../validations/categoryValid';
 import { CustomRequest } from '../@types/request.types';
 import { SortOrder } from 'mongoose';
 
-exports.categoryCtrl = {
-	getCategorylist: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		let sort = req.query.sort || 'name';
+export const categoryCtrl = {
+	getCategorylist: async (req: Request, res: Response, _next: NextFunction) => {
+		let sort = (req.query.sort as string) || 'name';
 		let reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
 		try {
 			let data = await CategoryModel.find({})
@@ -19,13 +19,13 @@ exports.categoryCtrl = {
 			return res.status(500).json({ msg: 'there error try again later', err });
 		}
 	},
-	search: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		const perPage = Math.min(req.query.perPage || 10, 20);
-		const page = req.query.page || 1;
-		let sort = req.query.sort || 'createdAt';
+	search: async (req: Request, res: Response, _next: NextFunction) => {
+		const perPage = Math.min(Number(req.query.perPage) || 10, 20);
+		const page = Number(req.query.page) || 1;
+		let sort = (req.query.sort as string) || 'createdAt';
 		let reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
 		try {
-			let searchQ = req.query?.s;
+			let searchQ = req.query?.s as string;
 			let searchReg = new RegExp(searchQ, 'i');
 			let category = await CategoryModel.find({
 				$and: [
@@ -44,16 +44,15 @@ exports.categoryCtrl = {
 			res.status(500).json({ message: error });
 		}
 	},
-
-	addCategory: async (req: CustomRequest, res: Response, _next: NextFunction) => {
+	addCategory: async (req: Request, res: Response, _next: NextFunction) => {
 		let validBody = validateCategory(req.body);
 		if (validBody.error) {
 			res.status(400).json(validBody.error.details);
 		}
 		try {
 			let newCategory = new CategoryModel(req.body);
-			newCategory.creator_id = req.tokenData._id;
-			newCategory.editor_id = req.tokenData._id;
+			newCategory.creator_id = String(req.tokenData._id);
+			newCategory.editor_id = String(req.tokenData._id);
 			await newCategory.save();
 			let category = await CategoryModel.findById(newCategory._id)
 				.populate({ path: 'creator_id', select })
@@ -70,8 +69,7 @@ exports.categoryCtrl = {
 			return res.status(500).json({ error });
 		}
 	},
-
-	editCategory: async (req: CustomRequest, res: Response, _next: NextFunction) => {
+	editCategory: async (req: Request, res: Response, _next: NextFunction) => {
 		let validBody = validateCategory(req.body);
 		if (validBody.error) {
 			res.status(400).json(validBody.error.details);
@@ -82,7 +80,7 @@ exports.categoryCtrl = {
 			let category = await CategoryModel.findOne({ _id: idEdit });
 			if (category) {
 				category.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
-				category.editor_id = req.tokenData._id;
+				category.editor_id = String(req.tokenData._id);
 				category.save();
 				res.status(200).json({ category });
 			}
@@ -92,8 +90,7 @@ exports.categoryCtrl = {
 			res.status(500).json({ msg: 'err', err: error });
 		}
 	},
-
-	deleteCategory: async (req: CustomRequest, res: Response, _next: NextFunction) => {
+	deleteCategory: async (req: Request, res: Response, _next: NextFunction) => {
 		try {
 			let idDel = req.params.idDel;
 			let data = await CategoryModel.deleteOne({ _id: idDel });
@@ -103,7 +100,7 @@ exports.categoryCtrl = {
 			res.status(500).json({ msg: 'err', err: error });
 		}
 	},
-	count: async (req: CustomRequest, res: Response, _next: NextFunction) => {
+	count: async (req: Request, res: Response, _next: NextFunction) => {
 		try {
 			let count = await CategoryModel.countDocuments({});
 			res.json({ count });

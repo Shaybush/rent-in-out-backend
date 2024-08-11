@@ -1,4 +1,4 @@
-import { Request } from 'express';
+import { Request as ExpressRequest } from 'express';
 import { Types } from 'mongoose';
 
 // --------------------- params ---------------------
@@ -141,7 +141,7 @@ export type RequestQuery = RequestQueryCategory & RequestQueryPost & RequestQuer
 
 export type ResponseBody = {};
 
-export interface CustomRequest extends Request<RequestParams, ResponseBody, RequestBody, RequestQuery> {
+export interface CustomRequest extends ExpressRequest<RequestParams, ResponseBody, RequestBody, RequestQuery> {
 	tokenData: {
 		_id: Types.ObjectId | string;
 		role: string;

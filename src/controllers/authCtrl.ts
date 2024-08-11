@@ -13,7 +13,7 @@ import { CustomRequest } from '../@types/request.types';
 dotenv.config();
 const saltRounds = 10;
 
-exports.authCtrl = {
+export const authCtrl = {
 	signUp: async (req: CustomRequest, res: Response, _next: NextFunction) => {
 		let validBody = validateUser(req.body);
 		if (validBody.error) {
@@ -38,7 +38,7 @@ exports.authCtrl = {
 			res.status(500).json({ msg: 'err', err });
 		}
 	},
-	login: async (req: CustomRequest, res: Response, _next: NextFunction) => {
+	login: async (req: Request, res: Response, _next: NextFunction) => {
 		const validBody = validateUserLogin(req.body);
 		if (validBody.error) {
 			return res.status(401).json({ msg: validBody.error.details });

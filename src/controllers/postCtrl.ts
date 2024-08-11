@@ -12,7 +12,7 @@ import { SortOrder, Types } from 'mongoose';
 const MAX = 10000000;
 const MIN = 0;
 
-exports.postCtrl = {
+export const postCtrl = {
 	getAll: async (req: CustomRequest, res: Response, _next: NextFunction) => {
 		let perPage = Math.min(req.query.perPage, 20) || 15;
 		let page = req.query.page || 1;

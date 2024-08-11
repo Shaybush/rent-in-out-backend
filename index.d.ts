@@ -1,12 +1,11 @@
-import { IUser } from '../models/interfaces/userInterface.interface';
-
+import { Types } from 'mongoose';
 export {};
 
 declare global {
 	namespace Express {
 		interface Request {
 			_id: Types.ObjectId;
-			user: IUser;
+			user: string;
 
 			tokenData: {
 				_id: string | Types.ObjectId;

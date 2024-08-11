@@ -8,7 +8,7 @@ import { NextFunction, Response } from 'express';
 import { SortOrder } from 'mongoose';
 import { Cloudinary } from '../models/interfaces/userInterface.interface';
 
-exports.userCtrl = {
+export const userCtrl = {
 	checkToken: (req: CustomRequest, res: Response, _next: NextFunction) => {
 		res.json(req.tokenData);
 	},

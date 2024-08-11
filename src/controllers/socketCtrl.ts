@@ -3,7 +3,7 @@ import { CustomRequest } from '../@types/request.types';
 import { MessageModel } from '../models/messageModel';
 import { UserModel } from '../models/userModel';
 
-exports.socketCtrl = {
+export const socketCtrl = {
 	chatUpdate: async (req: CustomRequest, res: Response, _next: NextFunction) => {
 		let message: any = await UserModel.findOne({ _id: req.body.userID }).populate({
 			path: 'messages',
