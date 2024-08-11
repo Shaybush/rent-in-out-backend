@@ -1,0 +1,16 @@
+trailingComma: es5 # Trailing commas where valid in ES5 (Objects, arrays, etc.)
+tabWidth: 2 # indent tab is 2 spaces worth
+useTabs: true
+semi: true # prints semi-colons at the ends of statements
+singleQuote: true # turns this " into '
+jsxSingleQuote: true # turns this " into ' in JSX
+bracketSameLine: false # if true, puts the closing > of an opening tag on the last line instead of on a new line.
+bracketSpacing: true # turns this {foo: bar} into this { foo: bar }
+arrowParens: always # turns this x => x into this (x) => x
+parser: typescript
+endOfLine: auto
+printWidth: 120
+proseWrap: preserve
+htmlWhitespaceSensitivity: css
+embeddedLanguageFormatting: off
+quoteProps: as-needed # only add quotes around object properties where required
