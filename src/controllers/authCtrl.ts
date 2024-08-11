@@ -130,11 +130,11 @@ exports.authCtrl = {
 			res.redirect(`/users/verified/?error=true&message=${message}`);
 		}
 	},
-	verifiedUser: async (req: CustomRequest, res: Response, _next: NextFunction) => {
+	verifiedUser: (req: CustomRequest, res: Response, _next: NextFunction) => {
 		// TODO - check if possible just redirect
 		res.sendFile(path.join(__dirname, '../views/verified.html'));
 	},
-	requestPasswordReset: async (req: CustomRequest, res: Response, _next: NextFunction) => {
+	requestPasswordReset: (req: CustomRequest, res: Response, _next: NextFunction) => {
 		const { email, redirectUrl } = req.body;
 		UserModel.findOne({ email }).then((data) => {
 			if (data) {

@@ -3,39 +3,37 @@ import { getUserDetailFromAccessToken } from '../helpers/services/axiosService';
 import { UserModel } from '../models/userModel';
 import { createToken } from '../helpers/userHelper';
 
-export const loginGmail = async(req: Request, res: Response, next:NextFunction) => {
-  let google_email;
-  if(req.body.token) {
-    try {
-      const google_token = req.body.token;
-      // try to recieve google email from token
-      if (google_token) {
-        try {
-          const response = await getUserDetailFromAccessToken(google_token);
-          google_email = response.data?.email;
-        } catch (err) {
-          return res.status(500).json({ msg: 'Couldn\'t login google', err });
-        }
-      }
-      const user = await UserModel.findOne({
-        email: google_email,
-      });
-      if (!user) { return res.status(401).json({ msg: 'User not found' }); }
+export const loginGmail = async (req: Request, res: Response, next: NextFunction) => {
+	let google_email;
+	if (req.body.token) {
+		try {
+			const google_token = req.body.token;
+			// try to recieve google email from token
+			if (google_token) {
+				try {
+					const response = await getUserDetailFromAccessToken(google_token);
+					google_email = response.data?.email;
+				} catch (err) {
+					return res.status(500).json({ msg: "Couldn't login google", err });
+				}
+			}
+			const user = await UserModel.findOne({
+				email: google_email,
+			});
+			if (!user) {
+				return res.status(401).json({ msg: 'User not found' });
+			}
 
-      const { active } = user;
-      if (!active) {
-        return res
-          .status(401)
-          .json({ msg: 'User blocked/ need to verify your email' });
-      }
-      let newAccessToken = createToken(user._id, user.role);
-      return res.json({ token: newAccessToken, user });
-    } catch (err) {
-      return res.status(500).json({ msg: 'There was an error signing' });
-    }
-  }
-  else {
-    next();
-  }
-
+			const { active } = user;
+			if (!active) {
+				return res.status(401).json({ msg: 'User blocked/ need to verify your email' });
+			}
+			let newAccessToken = createToken(user._id, user.role);
+			return res.json({ token: newAccessToken, user });
+		} catch (err) {
+			return res.status(500).json({ msg: 'There was an error signing' });
+		}
+	} else {
+		next();
+	}
 };

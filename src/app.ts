@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 import express from 'express';
 import path from 'path';
@@ -37,11 +37,13 @@ app.use(fileUpload({ limits: { fileSize: 1024 * 1024 * 5 } }));
 app.use(express.json());
 app.use(session({ secret: 'cats' }));
 app.use(express.static(path.join(__dirname, 'public')));
-routesInit(app);
 
-app.use((req: Request, res: Response) => {
-	console.log(req.baseUrl, req.originalUrl);
+app.use((req: Request, _res: Response, next: NextFunction) => {
+	console.log(req.method, req.originalUrl);
+	next();
 });
+
+routesInit(app);
 
 const server = http.createServer(app);
 // socket io
@@ -51,9 +53,11 @@ const io = new Server(server, {
 		methods: ['GET', 'POST', 'PUT', 'DELETE'],
 	},
 });
+
 app.get('/', (req: Request, res: Response) => {
 	res.json('Socket ready');
 });
+
 let port = process.env.PORT || 3001;
 server.listen(port, () => {
 	console.log(`Server is running on port: ${port}`);

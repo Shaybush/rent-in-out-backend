@@ -1,11 +1,11 @@
-import { NextFunction } from 'express';
+import { NextFunction, Response } from 'express';
 import { CustomRequest } from '../@types/request.types';
 import { MessageModel } from '../models/messageModel';
 import { UserModel } from '../models/userModel';
 
 exports.socketCtrl = {
 	chatUpdate: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		let message = await UserModel.findOne({ _id: req.body.userID }).populate({
+		let message: any = await UserModel.findOne({ _id: req.body.userID }).populate({
 			path: 'messages',
 			select: 'roomID',
 		});
@@ -30,7 +30,7 @@ exports.socketCtrl = {
 		}
 	},
 	getChatByRoomID: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		let message = await UserModel.findOne({ _id: req.tokenData._id }).populate({
+		let message: any = await UserModel.findOne({ _id: req.tokenData._id }).populate({
 			path: 'messages',
 		});
 		let roomID = req.params.roomID;
@@ -47,12 +47,12 @@ exports.socketCtrl = {
 	},
 	getUserChats: async (req: CustomRequest, res: Response, _next: NextFunction) => {
 		try {
-			let message = await UserModel.findOne({ _id: req.tokenData._id }).populate({
+			let message: any = await UserModel.findOne({ _id: req.tokenData._id }).populate({
 				path: 'messages',
 			});
 			let messages = message.messages.sort(function (a, b) {
-				var keyA = new Date(a.updatedAt),
-					keyB = new Date(b.updatedAt);
+				let keyA = new Date(a.updatedAt);
+				let keyB = new Date(b.updatedAt);
 				// Compare the 2 dates
 				if (keyA > keyB) {
 					return -1;
@@ -68,11 +68,11 @@ exports.socketCtrl = {
 		}
 	},
 	deleteMessage: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		let msgID = req.params.msgID;
+		let messageId = req.params.msgID;
 		let roomID = req.params.roomID;
 		try {
 			let chat = await MessageModel.findOne({ roomID: roomID });
-			chat.messagesArr.splice(msgID, 1);
+			chat.messagesArr.splice(messageId, 1);
 			await chat.save();
 
 			if (chat.messagesArr.length < 1) {

@@ -17,7 +17,7 @@ exports.postCtrl = {
 		let perPage = Math.min(req.query.perPage, 20) || 15;
 		let page = req.query.page || 1;
 		let sort = req.query.sort || 'createdAt';
-		let reverse: SortOrder = req.query.reverse == 'yes' ? -1 : 1;
+		let reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
 		try {
 			let posts = await PostModel.find({})
 				.sort([[sort, reverse]])
@@ -147,7 +147,7 @@ exports.postCtrl = {
 		let perPage = Math.min(req.query.perPage, 20) || 15;
 		let page = req.query.page || 1;
 		let sort = req.query.sort || 'createdAt';
-		let reverse: SortOrder = req.query.reverse == 'yes' ? -1 : 1;
+		let reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
 
 		try {
 			// query params
@@ -186,7 +186,7 @@ exports.postCtrl = {
 	changeActive: async (req: CustomRequest, res: Response, _next: NextFunction) => {
 		try {
 			let postID = req.params.postID;
-			if (postID == config.superID) {
+			if (postID === config.superID) {
 				return res.status(401).json({ msg: 'You cant change superadmin to user' });
 			}
 			let post = await PostModel.findOne({ _id: postID });
@@ -203,7 +203,7 @@ exports.postCtrl = {
 		let perPage = Math.min(req.query.perPage, 20) || 10;
 		let page = req.query.page || 1;
 		let sort = req.query.sort || 'createdAt';
-		let reverse: SortOrder = req.query.reverse == 'yes' ? -1 : 1;
+		let reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
 		try {
 			let id = req.params.userID;
 			let posts = await PostModel.find({ creator_id: id })
@@ -220,13 +220,13 @@ exports.postCtrl = {
 		if (!req.body.range) {
 			return res.status(400).json({ msg: 'Need to send range in body' });
 		}
-		if (req.body.range != 'long-term' && req.body.range != 'short-term') {
+		if (req.body.range !== 'long-term' && req.body.range !== 'short-term') {
 			return res.status(400).json({ msg: 'Range must be long/short-term' });
 		}
 		try {
 			let postID = req.params.postID;
 			let data;
-			if (postID == config.superID) {
+			if (postID === config.superID) {
 				return res.status(401).json({ msg: 'You cant change superadmin to user' });
 			}
 			if (req.tokenData.role === 'admin') {
@@ -305,7 +305,7 @@ exports.postCtrl = {
 			res.status(500).json({ msg: 'err', err });
 		}
 	},
-	onCancelDel: async (req: CustomRequest, res: Response, _next: NextFunction) => {
+	onCancelDel: (req: CustomRequest, res: Response, _next: NextFunction) => {
 		// TODO - need to fix logic in frontend, send req.body.images;
 		// let images = req.body;
 		// let details = {

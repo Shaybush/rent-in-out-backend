@@ -20,7 +20,6 @@ export default [
 			'prefer-import': tseslintPrefer,
 			prettier: prettier,
 		},
-		extends: ['plugin:@typescript-eslint/recommended', 'plugin:prettier/recommended'],
 		rules: {
 			// Avoid redundant spaces
 			'no-multi-spaces': 'error',

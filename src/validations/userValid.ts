@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { RequestBody } from '../@types/request.types';
 
 export const validateUser = (_reqBody: Partial<RequestBody>) => {
-	let joiSchema = Joi.object({
+	const joiSchema = Joi.object({
 		fullName: {
 			firstName: Joi.string().min(2).max(25).required(),
 			lastName: Joi.string().min(2).max(25).required(),
@@ -20,7 +20,7 @@ export const validateUser = (_reqBody: Partial<RequestBody>) => {
 };
 
 export const validateUserLogin = (_reqBody: Partial<RequestBody>) => {
-	let joiSchema = Joi.object({
+	const joiSchema = Joi.object({
 		email: Joi.string().email().min(2).max(35).required(),
 		password: Joi.string().min(2).max(25).required(),
 	});

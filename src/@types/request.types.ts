@@ -18,6 +18,16 @@ type RequestParamsPost = {
 	imgID: string;
 };
 
+type RequestParamsSocket = {
+	roomID: string;
+	msgID: number;
+	chatID: Types.ObjectId;
+};
+
+type RequestParamsUser = {
+	id: string;
+};
+
 // --------------------- request body ---------------------
 type RequestBodyAuth = {
 	userId: string;
@@ -64,6 +74,26 @@ type RequestBodyEmail = {
 	textarea: string;
 };
 
+type RequestBodySocket = {
+	userID: string;
+	creatorID: string;
+
+	messageObj: {
+		roomID: Types.ObjectId;
+		messagesArr: ISocketMessageModel[];
+	};
+};
+
+type RequestBodyUser = {
+	rnk: number;
+};
+
+interface ISocketMessageModel {
+	sender: string;
+	userName: string;
+	message: string;
+}
+
 interface ICloudinaryModel {
 	url: string;
 	img_id: string;
@@ -89,11 +119,25 @@ type RequestQueryPost = {
 	min: number;
 	categories: string;
 };
+
+type RequestQueryUser = {
+	rankingUser: string;
+	id: string;
+};
 // --------------------- response body ---------------------
 
-export type RequestParams = RequestParamsCategory & RequestParamsAuth & RequestParamsPost;
-export type RequestBody = RequestBodyAuth & RequestBodyCategory & RequestBodyPost & RequestBodyEmail;
-export type RequestQuery = RequestQueryCategory & RequestQueryPost;
+export type RequestParams = RequestParamsCategory &
+	RequestParamsAuth &
+	RequestParamsPost &
+	RequestParamsSocket &
+	RequestParamsUser;
+export type RequestBody = RequestBodyAuth &
+	RequestBodyCategory &
+	RequestBodyPost &
+	RequestBodyEmail &
+	RequestBodySocket &
+	RequestBodyUser;
+export type RequestQuery = RequestQueryCategory & RequestQueryPost & RequestQueryUser;
 
 export type ResponseBody = {};
 
