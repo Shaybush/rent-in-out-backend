@@ -1,376 +1,344 @@
 import { config } from '../config/config';
 import { checkUndefinedOrNull } from '../helpers/functions';
 import { select } from '../helpers/userHelper';
-import { NextFunction, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { PostModel } from '../models/postModel';
 import { UserModel } from '../models/userModel';
 import { validatePost } from '../validations/postValid';
-import { CustomRequest } from '../@types/request.types';
 import { v2 as cloudinary } from 'cloudinary';
 import { SortOrder, Types } from 'mongoose';
 
 const MAX = 10000000;
 const MIN = 0;
 
-export const postCtrl = {
-	getAll: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		let perPage = Math.min(req.query.perPage, 20) || 15;
-		let page = req.query.page || 1;
-		let sort = req.query.sort || 'createdAt';
-		let reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
-		try {
-			let posts = await PostModel.find({})
-				.sort([[sort, reverse]])
-				.limit(perPage)
-				.skip((page - 1) * perPage)
-				.populate({ path: 'likes', select })
-				.populate({ path: 'creator_id', select });
-			return res.json(posts);
-		} catch (err) {
-			res.status(500).json({ err: err });
-		}
-	},
-	postByID: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		let postID = req.params.postID;
-		try {
-			const post = await PostModel.findById(postID).populate({
-				path: 'creator_id',
-				select,
-			});
-			res.status(200).json(post);
-		} catch (err) {
-			res.status(500).json({ err: 'cannot find the post..' });
-		}
-	},
-	upload: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		let validBody = validatePost(req.body);
-		if (validBody.error) {
-			return res.status(400).json(validBody.error.details);
-		}
-		try {
-			let newPost = new PostModel(req.body);
-			newPost.creator_id = req.tokenData._id;
-			await newPost.save();
-
-			let post = await PostModel.findById(newPost._id).populate({
-				path: 'creator_id',
-				select,
-			});
-			res.status(201).json(post);
-		} catch (err) {
-			res.status(500).json({ err: err });
-		}
-	},
-	update: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		try {
-			let postID = req.params.postID;
-			let data;
-			if (req.tokenData.role === 'admin') {
-				data = await PostModel.updateOne({ _id: postID }, req.body);
-			} else {
-				data = await PostModel.updateOne({ _id: postID, creator_id: req.tokenData._id }, req.body);
-			}
-			if (data.modifiedCount === 1) {
-				let post = await PostModel.findOne({ _id: postID });
-				post.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
-				await post.save();
-				return res.status(200).json({ data, msg: 'post edited' });
-			}
-			res.status(400).json({ data: null, msg: 'cannot edit post' });
-		} catch (err) {
-			console.error(err);
-			res.status(400).json({ err });
-		}
-	},
-	delete: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		let postID = req.params.postID;
-		// cloudinary details to destroy post
-		let details = {
-			cloud_name: config.cloudinary_post_name,
-			api_key: config.cloudinary_post_key,
-			api_secret: config.cloudinary_post_secret,
-			type: 'upload',
-		};
-		// found post by id
-		let post = await PostModel.findById(postID);
-
-		// for each image delete from cloudinary to save memory space
-		const deleteCloudinaryImages = () => {
-			post.img.forEach((img) => {
-				cloudinary.uploader.destroy(img.img_id, details, (error, result) => {
-					if (error) {
-						return res.json({ error });
-					}
-				});
-			});
-		};
-
-		try {
-			let data;
-			// case 1: if the user is admin allow to delete in any case
-			if (req.tokenData.role === 'admin') {
-				data = await PostModel.deleteOne({ _id: postID }, req.body);
-			}
-			// case 2: if the user ain't admin than check if he create the post
-			else {
-				data = await PostModel.deleteOne({ _id: postID, creator_id: req.tokenData._id }, req.body);
-			}
-			if (data.deletedCount === 1) {
-				deleteCloudinaryImages();
-				return res.status(200).json({ data, msg: 'post deleted' });
-			}
-			return res.status(400).json({ data: null, msg: 'user cannot delete this post' });
-		} catch (err) {
-			console.error(err);
-			res.status(400).json({ err });
-		}
-	},
-	countAll: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		try {
-			let count = await PostModel.countDocuments({});
-			res.json({ count });
-		} catch (err) {
-			res.status(500).json({ msg: 'err', err });
-		}
-	},
-	countMyPosts: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		try {
-			let count = await PostModel.countDocuments({
-				creator_id: req.tokenData._id,
-			});
-			res.json({ count });
-		} catch (err) {
-			res.status(500).json({ msg: 'err', err });
-		}
-	},
-	search: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		let perPage = Math.min(req.query.perPage, 20) || 15;
-		let page = req.query.page || 1;
-		let sort = req.query.sort || 'createdAt';
-		let reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
-
-		try {
-			// query params
-			let searchQ = checkUndefinedOrNull(req.query?.searchQ) ? '' : req.query.searchQ;
-			let max = checkUndefinedOrNull(req.query?.max) ? MAX : req.query.max;
-			let min = checkUndefinedOrNull(req.query?.min) ? MIN : req.query?.min;
-			let categories = checkUndefinedOrNull(req.query?.categories) ? null : req.query?.categories.split(',');
-			// regex search ignore case sensitive
-			let searchReg = new RegExp(searchQ, 'i');
-			let posts;
-			posts = categories?.length
-				? await PostModel.find({
-						title: { $regex: searchReg },
-						price: { $gte: min, $lt: max },
-						category_url: { $in: categories },
-					})
-						.limit(perPage)
-						.skip((page - 1) * perPage)
-						.sort([[sort, reverse]])
-						.populate({ path: 'likes', select })
-						.populate({ path: 'creator_id', select })
-				: await PostModel.find({
-						title: { $regex: searchReg },
-						price: { $gte: min, $lt: max },
-					})
-						.limit(perPage)
-						.skip((page - 1) * perPage)
-						.sort([[sort, reverse]])
-						.populate({ path: 'likes', select })
-						.populate({ path: 'creator_id', select });
-			res.json({ count: posts.length, posts });
-		} catch (err) {
-			res.status(500).json({ err: err });
-		}
-	},
-	changeActive: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		try {
-			let postID = req.params.postID;
-			if (postID === config.superID) {
-				return res.status(401).json({ msg: 'You cant change superadmin to user' });
-			}
-			let post = await PostModel.findOne({ _id: postID });
-			post.active = !post.active;
-			post.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
-			post.save();
-
-			return res.json(post);
-		} catch (err) {
-			res.status(500).json({ msg: 'err', err });
-		}
-	},
-	userPosts: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		let perPage = Math.min(req.query.perPage, 20) || 10;
-		let page = req.query.page || 1;
-		let sort = req.query.sort || 'createdAt';
-		let reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
-		try {
-			let id = req.params.userID;
-			let posts = await PostModel.find({ creator_id: id })
-				.limit(perPage)
-				.skip((page - 1) * perPage)
-				.sort([[sort, reverse]])
-				.populate({ path: 'creator_id', select });
-			res.json(posts);
-		} catch (err) {
-			res.status(500).json({ err: err });
-		}
-	},
-	changeRange: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		if (!req.body.range) {
-			return res.status(400).json({ msg: 'Need to send range in body' });
-		}
-		if (req.body.range !== 'long-term' && req.body.range !== 'short-term') {
-			return res.status(400).json({ msg: 'Range must be long/short-term' });
-		}
-		try {
-			let postID = req.params.postID;
-			let data;
-			if (postID === config.superID) {
-				return res.status(401).json({ msg: 'You cant change superadmin to user' });
-			}
-			if (req.tokenData.role === 'admin') {
-				data = await PostModel.updateOne({ _id: postID }, { range: req.body.range });
-			} else {
-				data = await PostModel.updateOne({ _id: postID, creator_id: req.tokenData._id }, { range: req.body.range });
-			}
-			// update the change time
-			let post = await PostModel.findOne({ _id: postID });
-			post.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
-			post.save();
-			return res.json(data);
-		} catch (err) {
-			res.status(500).json({ msg: 'err', err });
-		}
-	},
-	likePost: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		// find user by id
-		let user = await UserModel.findById(req.tokenData._id);
-		// get post from query params
-		let postID = req.params.postID;
-		// find the current post by id and get likes object from ID by populate
-		let post = await PostModel.findOne({ _id: postID })
+export const getAllPosts = async (req: Request, res: Response, _next: NextFunction) => {
+	const perPage = Math.min(Number(req.query.perPage) || 15, 20);
+	const page = Number(req.query.page) || 1;
+	const sort = (req.query.sort as string) || 'createdAt';
+	const reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
+	try {
+		const posts = await PostModel.find({})
+			.sort([[sort, reverse]])
+			.limit(perPage)
+			.skip((page - 1) * perPage)
 			.populate({ path: 'likes', select })
 			.populate({ path: 'creator_id', select });
+		return res.json(posts);
+	} catch (err) {
+		return res.status(500).json({ err });
+	}
+};
 
-		// if the user found in the array setup found true else false
-		const found = post.likes.some((el) => String(el.id) === req.tokenData._id);
-		if (!found) {
-			// add to array of likes
-			post.likes.unshift(req.tokenData._id as Types.ObjectId);
+export const getPostByID = async (req: Request, res: Response, _next: NextFunction) => {
+	const postID = req.params.postID;
+	try {
+		const post = await PostModel.findById(postID).populate({ path: 'creator_id', select });
+		return res.status(200).json(post);
+	} catch (err) {
+		return res.status(500).json({ err: 'Cannot find the post.' });
+	}
+};
+
+// TODO - add type for req - understand why req.tokenData._id cannot defined
+export const uploadPost = async (req, res: Response, _next: NextFunction) => {
+	const validBody = validatePost(req.body);
+	if (validBody.error) {
+		return res.status(400).json(validBody.error.details);
+	}
+	try {
+		const newPost = new PostModel(req.body);
+		newPost.creator_id = req.tokenData._id;
+		await newPost.save();
+
+		const post = await PostModel.findById(newPost._id).populate({ path: 'creator_id', select });
+		return res.status(201).json(post);
+	} catch (err) {
+		return res.status(500).json({ err });
+	}
+};
+
+// TODO - add type for req - understand why req.tokenData._id cannot defined
+export const updatePost = async (req, res: Response, _next: NextFunction) => {
+	try {
+		const postID = req.params.postID;
+		let data;
+		if (req.tokenData.role === 'admin') {
+			data = await PostModel.updateOne({ _id: postID }, req.body);
+		} else {
+			data = await PostModel.updateOne({ _id: postID, creator_id: req.tokenData._id }, req.body);
+		}
+		if (data.modifiedCount === 1) {
+			const post = await PostModel.findOne({ _id: postID });
+			post.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
 			await post.save();
-
-			// Type guard to check if creator_id is an object with _id
-			if (!('creator_id' in post && typeof post.creator_id === 'object' && '_id' in post.creator_id)) {
-				return res.status(500).json({ message: 'Post creator_id is not populated correctly' });
-			}
-
-			// check if the post already in wish list
-			const inWishlist = user.wishList.some((el) => String(el) === postID);
-			// check two cases -
-			// 1. case 1 : if post not in wish list
-			// 2. case 2 : creator can't move to wish list his items
-			if (!inWishlist && String(post.creator_id._id) !== req.tokenData._id) {
-				user.wishList.unshift(post._id);
-				await user.save();
-			}
-			return res.status(201).json({ posts: post.likes, post: post, msg: 'You like the post' });
+			return res.status(200).json({ data, msg: 'Post edited' });
 		}
+		return res.status(400).json({ data: null, msg: 'Cannot edit post' });
+	} catch (err) {
+		console.error(err);
+		return res.status(400).json({ err });
+	}
+};
 
-		// remove from post like the user.
-		post.likes = post.likes.filter((e) => String(e._id) !== req.tokenData._id);
-		await post.save();
+// TODO - add type for req - understand why req.tokenData._id cannot defined
+export const deletePost = async (req, res: Response, _next: NextFunction) => {
+	const postID = req.params.postID;
+	const details = {
+		cloud_name: config.cloudinary_post_name,
+		api_key: config.cloudinary_post_key,
+		api_secret: config.cloudinary_post_secret,
+		type: 'upload',
+	};
 
-		// wish list remove item
-		user.wishList = user.wishList.filter((el) => String(el) !== postID);
-		await user.save();
-		res.status(201).json({ posts: post.likes, msg: 'unlike the post' });
-	},
-	countLikes: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		try {
-			let postID = req.params.postID;
-			let post = await PostModel.findOne({ _id: postID });
-			let likes = await post.likes;
-			res.json({ count: likes.length });
-		} catch (err) {
-			res.status(500).json({ msg: 'err', err });
-		}
-	},
-	topThreeLikes: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		try {
-			let postID = req.params.postID;
-			let post = await PostModel.findOne({ _id: postID });
-			res.json({ likes: post.likes.splice(0, 3) });
-		} catch (err) {
-			res.status(500).json({ msg: 'err', err });
-		}
-	},
-	onCancelDel: (req: CustomRequest, res: Response, _next: NextFunction) => {
-		// TODO - need to fix logic in frontend, send req.body.images;
-		// let images = req.body;
-		// let details = {
-		// 	cloud_name: config.cloudinary_post_name,
-		// 	api_key: config.cloudinary_post_key,
-		// 	api_secret: config.cloudinary_post_secret,
-		// 	type: 'upload',
-		// };
-		try {
-			// images.forEach((img) => {
-			// 	cloudinary.uploader.destroy(img.img_id, details, (error, result) => {
-			// 		if (error) {
-			// 			return res.json({ error });
-			// 		}
-			// 	});
-			// });
-			return res.json({ msg: 'delete all images succeed' });
-		} catch (err) {
-			res.status(500).json({ msg: 'err', err });
-		}
-	},
-	singlePostImgDelete: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		let { postID, imgID } = req.params;
-		let details = {
-			cloud_name: config.cloudinary_post_name,
-			api_key: config.cloudinary_post_key,
-			api_secret: config.cloudinary_post_secret,
-			type: 'upload',
-		};
-		let post = await PostModel.findById(postID);
-		post.img.filter((img) => {
-			img.img_id !== imgID;
-		});
-		await post.save();
-		cloudinary.uploader.destroy(imgID, details, (error, result) => {
-			if (error) {
-				return res.json({ error });
-			}
-		});
-		return res.json({ msg: 'delete all images succeed' });
-	},
-	countByCategory: async (req: CustomRequest, res: Response, _next: NextFunction) => {
-		try {
-			const countMap = {};
-			let posts = await PostModel.find({});
-			let arrayOfCategories = posts.map((post) => post.category_url);
-
-			// Count occurrences of each item
-			arrayOfCategories.forEach((category) => {
-				if (countMap[category]) {
-					countMap[category] += 1;
-				} else {
-					countMap[category] = 1;
+	const post = await PostModel.findById(postID);
+	const deleteCloudinaryImages = () => {
+		post.img.forEach((img) => {
+			cloudinary.uploader.destroy(img.img_id, details, (error) => {
+				if (error) {
+					return res.json({ error });
 				}
 			});
+		});
+	};
 
-			// Convert the countMap to an array of objects
-			const catogoriesCount = Object.keys(countMap).map((key) => {
-				return { name: key, count: countMap[key] };
-			});
-
-			return res.json(catogoriesCount);
-		} catch (err) {
-			console.error(err);
-			res.status(500).json({ msg: 'err', err });
+	try {
+		let data;
+		if (req.tokenData.role === 'admin') {
+			data = await PostModel.deleteOne({ _id: postID });
+		} else {
+			data = await PostModel.deleteOne({ _id: postID, creator_id: req.tokenData._id });
 		}
-	},
+		if (data.deletedCount === 1) {
+			deleteCloudinaryImages();
+			return res.status(200).json({ data, msg: 'Post deleted' });
+		}
+		return res.status(400).json({ data: null, msg: 'User cannot delete this post' });
+	} catch (err) {
+		console.error(err);
+		return res.status(400).json({ err });
+	}
+};
+
+export const countAllPosts = async (req: Request, res: Response, _next: NextFunction) => {
+	try {
+		const count = await PostModel.countDocuments({});
+		return res.json({ count });
+	} catch (err) {
+		return res.status(500).json({ msg: 'Error', err });
+	}
+};
+
+// TODO - add type for req - understand why req.tokenData._id cannot defined
+export const countMyPosts = async (req, res: Response, _next: NextFunction) => {
+	try {
+		const count = await PostModel.countDocuments({ creator_id: req.tokenData._id });
+		return res.json({ count });
+	} catch (err) {
+		return res.status(500).json({ msg: 'Error', err });
+	}
+};
+
+// TODO - add type for req - understand why req.tokenData._id cannot defined
+export const searchPosts = async (req, res: Response, _next: NextFunction) => {
+	const perPage = Math.min(Number(req.query.perPage) || 15, 20);
+	const page = Number(req.query.page) || 1;
+	const sort = (req.query.sort as string) || 'createdAt';
+	const reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
+
+	try {
+		const searchQ = checkUndefinedOrNull(req.query?.searchQ) ? '' : req.query.searchQ;
+		const max = checkUndefinedOrNull(req.query?.max) ? MAX : req.query.max;
+		const min = checkUndefinedOrNull(req.query?.min) ? MIN : req.query?.min;
+		const categories = checkUndefinedOrNull(req.query?.categories) ? null : req.query?.categories.split(',');
+		const searchReg = new RegExp(searchQ, 'i');
+		const posts = categories?.length
+			? await PostModel.find({
+					title: { $regex: searchReg },
+					price: { $gte: min, $lt: max },
+					category_url: { $in: categories },
+				})
+					.limit(perPage)
+					.skip((page - 1) * perPage)
+					.sort([[sort, reverse]])
+					.populate({ path: 'likes', select })
+					.populate({ path: 'creator_id', select })
+			: await PostModel.find({
+					title: { $regex: searchReg },
+					price: { $gte: min, $lt: max },
+				})
+					.limit(perPage)
+					.skip((page - 1) * perPage)
+					.sort([[sort, reverse]])
+					.populate({ path: 'likes', select })
+					.populate({ path: 'creator_id', select });
+
+		return res.json({ count: posts.length, posts });
+	} catch (err) {
+		return res.status(500).json({ err });
+	}
+};
+
+export const changeActiveStatus = async (req: Request, res: Response, _next: NextFunction) => {
+	try {
+		const postID = req.params.postID;
+		if (postID === config.superID) {
+			return res.status(401).json({ msg: 'You cannot change superadmin to user' });
+		}
+		const post = await PostModel.findOne({ _id: postID });
+		post.active = !post.active;
+		post.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
+		await post.save();
+
+		return res.json(post);
+	} catch (err) {
+		return res.status(500).json({ msg: 'Error', err });
+	}
+};
+
+export const getUserPosts = async (req: Request, res: Response, _next: NextFunction) => {
+	const perPage = Math.min(Number(req.query.perPage) || 10, 20);
+	const page = Number(req.query.page) || 1;
+	const sort = (req.query.sort as string) || 'createdAt';
+	const reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
+	try {
+		const id = req.params.userID;
+		const posts = await PostModel.find({ creator_id: id })
+			.limit(perPage)
+			.skip((page - 1) * perPage)
+			.sort([[sort, reverse]])
+			.populate({ path: 'creator_id', select });
+		return res.json(posts);
+	} catch (err) {
+		return res.status(500).json({ err });
+	}
+};
+
+// TODO - add type for req - understand why req.tokenData._id cannot defined
+export const changePostRange = async (req, res: Response, _next: NextFunction) => {
+	if (!req.body.range) {
+		return res.status(400).json({ msg: 'Need to send range in body' });
+	}
+	if (req.body.range !== 'long-term' && req.body.range !== 'short-term') {
+		return res.status(400).json({ msg: 'Range must be long/short-term' });
+	}
+	try {
+		const postID = req.params.postID;
+		let data;
+		if (postID === config.superID) {
+			return res.status(401).json({ msg: 'You cannot change superadmin to user' });
+		}
+		if (req.tokenData.role === 'admin') {
+			data = await PostModel.updateOne({ _id: postID }, { range: req.body.range });
+		} else {
+			data = await PostModel.updateOne({ _id: postID, creator_id: req.tokenData._id }, { range: req.body.range });
+		}
+		const post = await PostModel.findOne({ _id: postID });
+		post.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
+		await post.save();
+		return res.json(data);
+	} catch (err) {
+		return res.status(500).json({ msg: 'Error', err });
+	}
+};
+
+// TODO - add type for req - understand why req.tokenData._id cannot defined
+export const likePost = async (req, res: Response, _next: NextFunction) => {
+	const user = await UserModel.findById(req.tokenData._id);
+	const postID = req.params.postID;
+	const post = await PostModel.findOne({ _id: postID })
+		.populate({ path: 'likes', select })
+		.populate({ path: 'creator_id', select });
+
+	const found = post.likes.some((el) => String(el.id) === req.tokenData._id);
+	if (!found) {
+		post.likes.unshift(req.tokenData._id as Types.ObjectId);
+		await post.save();
+
+		if (!('creator_id' in post && typeof post.creator_id === 'object' && '_id' in post.creator_id)) {
+			return res.status(500).json({ message: 'Post creator_id is not populated correctly' });
+		}
+
+		const inWishlist = user.wishList.some((el) => String(el) === postID);
+		if (!inWishlist && String(post.creator_id._id) !== req.tokenData._id) {
+			user.wishList.unshift(post._id);
+			await user.save();
+		}
+		return res.status(201).json({ posts: post.likes, post, msg: 'You liked the post' });
+	}
+
+	post.likes = post.likes.filter((e) => String(e._id) !== req.tokenData._id);
+	await post.save();
+
+	user.wishList = user.wishList.filter((el) => String(el) !== postID);
+	await user.save();
+	return res.status(201).json({ posts: post.likes, msg: 'Unliked the post' });
+};
+
+export const countPostLikes = async (req: Request, res: Response, _next: NextFunction) => {
+	try {
+		const postID = req.params.postID;
+		const post = await PostModel.findOne({ _id: postID });
+		const likes = await post.likes;
+		return res.json({ count: likes.length });
+	} catch (err) {
+		return res.status(500).json({ msg: 'Error', err });
+	}
+};
+
+export const getTopThreeLikes = async (req: Request, res: Response, _next: NextFunction) => {
+	try {
+		const postID = req.params.postID;
+		const post = await PostModel.findOne({ _id: postID });
+		return res.json({ likes: post.likes.splice(0, 3) });
+	} catch (err) {
+		return res.status(500).json({ msg: 'Error', err });
+	}
+};
+
+export const onCancelDelete = (req: Request, res: Response, _next: NextFunction) => {
+	try {
+		return res.json({ msg: 'Delete all images succeeded' });
+	} catch (err) {
+		return res.status(500).json({ msg: 'Error', err });
+	}
+};
+
+export const deleteSinglePostImage = async (req: Request, res: Response, _next: NextFunction) => {
+	const { postID, imgID } = req.params;
+	const details = {
+		cloud_name: config.cloudinary_post_name,
+		api_key: config.cloudinary_post_key,
+		api_secret: config.cloudinary_post_secret,
+		type: 'upload',
+	};
+	const post = await PostModel.findById(postID);
+	post.img = post.img.filter((img) => img.img_id !== imgID);
+	await post.save();
+	cloudinary.uploader.destroy(imgID, details, (error) => {
+		if (error) {
+			return res.json({ error });
+		}
+	});
+	return res.json({ msg: 'Delete all images succeeded' });
+};
+
+export const countPostsByCategory = async (req: Request, res: Response, _next: NextFunction) => {
+	try {
+		const countMap = {};
+		const posts = await PostModel.find({});
+		const arrayOfCategories = posts.map((post) => post.category_url);
+
+		arrayOfCategories.forEach((category) => {
+			countMap[category] = (countMap[category] || 0) + 1;
+		});
+
+		const categoriesCount = Object.keys(countMap).map((key) => {
+			return { name: key, count: countMap[key] };
+		});
+
+		return res.json(categoriesCount);
+	} catch (err) {
+		console.error(err);
+		return res.status(500).json({ msg: 'Error', err });
+	}
 };

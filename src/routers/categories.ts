@@ -1,21 +1,20 @@
-import express, { NextFunction, Request, Response } from 'express';
-import { categoryCtrl } from '../controllers/categoryCtrl';
+import express from 'express';
+import {
+	addCategory,
+	countCategories,
+	deleteCategory,
+	editCategory,
+	getCategorylist,
+	searchCategories,
+} from '../controllers/categoryCtrl';
 import { authAdmin } from '../middlewares/auth';
-import { CustomRequest } from '../@types/request.types';
-import { SortOrder } from 'mongoose';
-import { CategoryModel } from '../models/categoryModel';
-import { select } from '../helpers/userHelper';
 const router = express.Router();
 
-// TODO - req.tokenData._id - error: tokenData does not exist...
-// how to declare tokenData ?
-// Option 1 - I used CustomRequest to extend Request
-// what else ? option 1 doesn't work well...
-router.get('/', categoryCtrl.getCategorylist);
-router.post('/', authAdmin, categoryCtrl.addCategory);
-router.put('/:idEdit', authAdmin, categoryCtrl.editCategory);
-router.delete('/:idDel', authAdmin, categoryCtrl.deleteCategory);
-router.get('/count', categoryCtrl.count);
-router.get('/search', authAdmin, categoryCtrl.search);
+router.get('/', getCategorylist);
+router.post('/', authAdmin, addCategory);
+router.put('/:idEdit', authAdmin, editCategory);
+router.delete('/:idDel', authAdmin, deleteCategory);
+router.get('/count', countCategories);
+router.get('/search', authAdmin, searchCategories);
 
 export default router;

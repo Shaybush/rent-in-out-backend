@@ -28,7 +28,7 @@ export interface IUser extends Document {
 	active: boolean;
 	rank: Rank[];
 	productsList: string[];
-	wishList: mongoose.Types.ObjectId[];
+	wishList: mongoose.Types.ObjectId[]; // TODO - improve that
 	messages: mongoose.Types.ObjectId[];
 	createdAt: number | Date;
 	updatedAt: number | Date;

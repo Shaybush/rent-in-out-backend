@@ -1,56 +1,64 @@
 import express from 'express';
 import { auth, authAdmin } from '../middlewares/auth';
-const router = express.Router();
-import { userCtrl } from '../controllers/userCtrl';
-import { authCtrl } from '../controllers/authCtrl';
-import { mailMe } from '../controllers/sendEmail';
-import { socketCtrl } from '../controllers/socketCtrl';
+import {
+	countUsers,
+	getUserInfoByIdWithToken,
+	getUserInfoById,
+	getUsersList,
+	searchUsers,
+	getUserAvgRank,
+	getWishListOfUser,
+	getUsersCountByDate,
+	editUser,
+	changeUserRole,
+	changeUserActiveStatus,
+	rankUser,
+	uploadProfileImg,
+	uploadBannerImg,
+	deleteUser,
+	deleteProfileImg,
+	deleteBannerImg,
+} from '../controllers/userCtrl';
+import { login, requestPasswordReset, resetPassword, signUp, verifiedUser, verifyUser } from '../controllers/authCtrl';
+import { chatUpdate, deleteChat, deleteMessage, getChatByRoomID, getUserChats } from '../controllers/socketCtrl';
 import { loginGmail } from '../middlewares/loginGmail.middleware';
+import { sendEmail } from '../controllers/sendEmail';
 
-// google signIn
-// router.post('/login/gmail', loginGmail);
+const router = express.Router();
 
-// authonication routes
-// get
-// router.get('/verified', authCtrl.verifiedUser);
-// router.get('/verify/:userId/:uniqueString', authCtrl.verifyUser);
-// post
-// router.post('/', authCtrl.signUp);
-// router.post('/login', loginGmail, authCtrl.login);
-// router.post('/requestPasswordReset', authCtrl.requestPasswordReset);
-// router.post('/resetPassword', authCtrl.resetPassword);
-// router.post('/clientEmail', mailMe.sendEmail);
-// authonication routes - end
+router.get('/verified', verifiedUser);
+router.get('/verify/:userId/:uniqueString', verifyUser);
+router.get('/userList', authAdmin, getUsersList);
+router.get('/userSearch', searchUsers);
+router.get('/count', authAdmin, countUsers);
+router.get('/info/:id', getUserInfoById);
+router.get('/infoToken/:id', auth, getUserInfoByIdWithToken);
+router.get('/getRank/:userID', getUserAvgRank);
+router.get('/getChat/:roomID', auth, getChatByRoomID);
+router.get('/getAllChat', auth, getUserChats);
+router.get('/getWishList', auth, getWishListOfUser);
+router.get('/users-by-date', auth, getUsersCountByDate);
 
-// user routes
-// get
-// router.get('/userList', authAdmin, userCtrl.getUsersList);
-// router.get('/userSearch', userCtrl.userSearch);
-// router.get('/count', authAdmin, userCtrl.countUsers);
-// router.get('/info/:id', userCtrl.infoById);
-// router.get('/infoToken/:id', auth, userCtrl.infoByIdWithToken);
-// router.get('/getRank/:userID', userCtrl.avgRank);
-// router.get('/getChat/:roomID', auth, socketCtrl.getChatByRoomID);
-// router.get('/getAllChat', auth, socketCtrl.getUserChats);
-// router.get('/getWishList', auth, userCtrl.getUserWishList);
-// router.get('/users-by-date', auth, userCtrl.getUsersCountByDate);
+router.put('/:idEdit', auth, editUser);
+router.patch('/changeRole/:userID', authAdmin, changeUserRole);
+router.patch('/changeActive/:userID', authAdmin, changeUserActiveStatus);
+router.patch('/rankUser/:userID', auth, rankUser);
+router.patch('/uploadProfile', auth, uploadProfileImg);
+router.patch('/uploadBanner', auth, uploadBannerImg);
+router.patch('/chatUpdate', auth, chatUpdate);
 
-// update
-// router.put('/:idEdit', auth, userCtrl.edit);
-// router.patch('/changeRole/:userID', authAdmin, userCtrl.changeRole);
-// router.patch('/changeActive/:userID', authAdmin, userCtrl.changeActive);
-// router.patch('/rankUser/:userID', auth, userCtrl.rankUser);
-// router.patch('/uploadProfile', auth, userCtrl.uploadImg);
-// router.patch('/uploadBanner', auth, userCtrl.uploadBanner);
-// router.patch('/chatUpdate', auth, socketCtrl.chatUpdate);
+router.delete('/:idDel', auth, deleteUser);
+router.delete('/deleteChat/:chatID', auth, deleteChat);
+router.delete('/deleteMessage/:roomID/:msgID', auth, deleteMessage);
 
-// delete
-// router.delete('/:idDel', auth, userCtrl.delete);
-// router.delete('/deleteChat/:chatID', auth, socketCtrl.deleteChat);
-// router.delete('/deleteMessage/:roomID/:msgID', auth, socketCtrl.deleteMessage);
-
-// delete from cloudinary
-// router.post('/cloudinary/profileDel', userCtrl.profileImgDelete);
-// router.post('/cloudinary/bannerDel', auth, userCtrl.bannerImgDelete);
+router.post('/cloudinary/profileDel', deleteProfileImg);
+router.post('/cloudinary/bannerDel', auth, deleteBannerImg);
+router.post('/', signUp);
+router.post('/login', loginGmail, login);
+router.post('/requestPasswordReset', requestPasswordReset);
+router.post('/resetPassword', resetPassword);
+router.post('/clientEmail', sendEmail);
+// // google signIn
+router.post('/login/gmail', loginGmail);
 
 export default router;

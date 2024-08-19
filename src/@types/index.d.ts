@@ -1,5 +1,5 @@
+import { Types } from 'mongoose';
 import { IUser } from '../models/interfaces/userInterface.interface';
-
 export {};
 
 declare global {
