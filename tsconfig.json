@@ -24,6 +24,6 @@
        "./node_modules/@types"
      ],   
   },
-  "include": ["src/**/*.ts", "src/@types/**/*.ts"],
+  "include": ["src/**/*.ts", "src/@types/index.d.ts"],
   "exclude": ["node_modules"],
 } 

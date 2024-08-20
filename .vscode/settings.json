@@ -18,5 +18,11 @@
   "css.lint.unknownAtRules": "ignore",
   "files.exclude": {
     "**/.git": false
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
   }
 }

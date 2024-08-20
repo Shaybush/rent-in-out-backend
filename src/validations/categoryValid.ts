@@ -1,7 +1,7 @@
 import Joi from 'joi';
-import { ResponseBody } from '../@types/request.types';
 
-export const validateCategory = (reqBody: Partial<ResponseBody>) => {
+// TODO - req body should have type
+export const validateCategory = (reqBody) => {
 	const joiSchema = Joi.object({
 		name: Joi.string().min(2).max(99).required(),
 		url_name: Joi.string().min(2).max(99).required(),

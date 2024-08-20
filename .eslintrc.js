@@ -61,7 +61,6 @@ module.exports = {
 		'eol-last': 'error', // Enforces newline at the end of files
 		'no-array-constructor': 'error', // Disallows Array constructors
 		'no-lonely-if': 'error', // Disallows if statements as the only statement in else blocks
-		'no-nested-ternary': 'warn', // Warns against nested ternary expressions
 		'no-new-object': 'error', // Disallows Object constructors
 		'no-trailing-spaces': 'error', // Disallows trailing whitespace
 		'one-var': ['error', 'never'], // Enforces variables to be declared either together or separately per function
@@ -71,5 +70,6 @@ module.exports = {
 		'@typescript-eslint/no-explicit-any': 'off',
 		'@typescript-eslint/no-unused-vars': 'off',
 		'@typescript-eslint/ban-types': 'off',
+		'@typescript-eslint/ban-ts-comment': 'off',
 	},
 };

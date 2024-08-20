@@ -1,7 +1,7 @@
 import Joi from 'joi';
-import { RequestBody } from '../@types/request.types';
 
-export const validateUser = (_reqBody: Partial<RequestBody>) => {
+// TODO - req body should have type
+export const validateUser = (reqBody) => {
 	const joiSchema = Joi.object({
 		fullName: {
 			firstName: Joi.string().min(2).max(25).required(),
@@ -16,14 +16,15 @@ export const validateUser = (_reqBody: Partial<RequestBody>) => {
 		profile_img: Joi.object().allow(null, ''),
 		cover_img: Joi.object().allow(null, ''),
 	});
-	return joiSchema.validate(_reqBody);
+	return joiSchema.validate(reqBody);
 };
 
-export const validateUserLogin = (_reqBody: Partial<RequestBody>) => {
+// TODO - req body should have type
+export const validateUserLogin = (reqBody) => {
 	const joiSchema = Joi.object({
 		email: Joi.string().email().min(2).max(35).required(),
 		password: Joi.string().min(2).max(25).required(),
 	});
 
-	return joiSchema.validate(_reqBody);
+	return joiSchema.validate(reqBody);
 };

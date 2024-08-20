@@ -2,7 +2,9 @@ import jwt from 'jsonwebtoken';
 import { config } from '../config/config';
 import { NextFunction, Request, Response } from 'express';
 
-export const auth = (req: any, res: Response, next: NextFunction) => {
+// TODO - figure out how to handle type issue with req: Request ->  not recognize this req.tokenData
+// I added this type in the declaration file... index.d.ts
+export const auth = (req, res: Response, next: NextFunction) => {
 	let token = req.header('x-api-key');
 	if (!token) {
 		return res.status(401).json({ msg: 'please send token this end point url ' });
@@ -16,7 +18,8 @@ export const auth = (req: any, res: Response, next: NextFunction) => {
 	}
 };
 
-export const authAdmin = (req: any, res: Response, next: NextFunction) => {
+// TODO - figure out how to handle type issue with req: Request ->  not recognize this req.tokenData
+export const authAdmin = (req, res: Response, next: NextFunction) => {
 	let token = req.header('x-api-key');
 	if (!token) {
 		return res.status(401).json({ msg: 'You need to send token to this endpoint url' });

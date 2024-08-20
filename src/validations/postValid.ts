@@ -1,5 +1,6 @@
 import Joi from 'joi';
 
+// TODO - interfaces should be in separated file
 export interface ICloudinaryModel {
 	url: string;
 	img_id: string;
@@ -24,7 +25,7 @@ interface IReqBodyPostModel {
 	collect_points?: ICollectPoints[];
 }
 
-export const validatePost = (_reqBody: IReqBodyPostModel) => {
+export const validatePost = (reqBody: IReqBodyPostModel) => {
 	let cloudinary = Joi.object().keys({
 		url: Joi.string().required(),
 		img_id: Joi.string().required(),
@@ -42,5 +43,5 @@ export const validatePost = (_reqBody: IReqBodyPostModel) => {
 		img: Joi.array().items(cloudinary),
 		collect_points: Joi.array().items(),
 	});
-	return joiSchema.validate(_reqBody);
+	return joiSchema.validate(reqBody);
 };
