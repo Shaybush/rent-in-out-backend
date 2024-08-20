@@ -6,15 +6,19 @@ import {
 	editCategory,
 	getCategorylist,
 	searchCategories,
-} from '../controllers/categoryCtrl';
+} from '../services/categoryService';
 import { authAdmin } from '../middlewares/auth';
+import { categoryControl } from '../controllers/categoryControl';
 const router = express.Router();
 
 router.get('/', getCategorylist);
-router.post('/', authAdmin, addCategory);
-router.put('/:idEdit', authAdmin, editCategory);
-router.delete('/:idDel', authAdmin, deleteCategory);
-router.get('/count', countCategories);
 router.get('/search', authAdmin, searchCategories);
+router.get('/count', countCategories);
+
+router.post('/', authAdmin, categoryControl, addCategory);
+
+router.put('/:idEdit', authAdmin, categoryControl, editCategory);
+
+router.delete('/:idDel', authAdmin, deleteCategory);
 
 export default router;

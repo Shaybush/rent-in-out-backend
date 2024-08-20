@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { select } from '../helpers/userHelper';
+import { select } from '../utils/userHelper';
 import { CategoryModel } from '../models/categoryModel';
 import { validateCategory } from '../validations/categoryValid';
 import { SortOrder } from 'mongoose';
@@ -50,10 +50,6 @@ export const searchCategories = async (req: Request, res: Response, _next: NextF
 // Add Category
 // TODO - figure out how to handle type issue with req: Request ->  not recognize this req.tokenData._id
 export const addCategory = async (req, res: Response, _next) => {
-	const validBody = validateCategory(req.body);
-	if (validBody.error) {
-		return res.status(400).json(validBody.error.details);
-	}
 	try {
 		const newCategory = new CategoryModel(req.body);
 		newCategory.creator_id = String(req.tokenData._id);
@@ -79,10 +75,6 @@ export const addCategory = async (req, res: Response, _next) => {
 // Edit Category
 // TODO - figure out how to handle type issue with req: Request ->  not recognize this req.tokenData._id
 export const editCategory = async (req, res: Response, _next: NextFunction) => {
-	const validBody = validateCategory(req.body);
-	if (validBody.error) {
-		return res.status(400).json(validBody.error.details);
-	}
 	try {
 		const idEdit = req.params.idEdit;
 		await CategoryModel.updateOne({ _id: idEdit }, req.body);

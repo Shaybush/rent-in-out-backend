@@ -1,7 +1,7 @@
 import { validateUser, validateUserLogin } from '../validations/userValid';
 import bcrypt from 'bcrypt';
 import { UserModel } from '../models/userModel';
-import { sendResetEmail, sendVerificationEmail, createToken } from '../helpers/userHelper';
+import { sendResetEmail, sendVerificationEmail, createToken } from '../utils/userHelper';
 import { UserVerificationModel } from '../models/userVerificationModel';
 import path from 'path';
 import { PasswordReset } from '../models/passwordReset';
@@ -13,10 +13,6 @@ dotenv.config();
 const saltRounds = 10;
 
 export const signUp = async (req: Request, res: Response, _next: NextFunction) => {
-	const validBody = validateUser(req.body);
-	if (validBody.error) {
-		return res.status(400).json({ message: validBody.error.details });
-	}
 	try {
 		const user = new UserModel(req.body);
 		user.password = await bcrypt.hash(user.password, saltRounds);
@@ -38,10 +34,6 @@ export const signUp = async (req: Request, res: Response, _next: NextFunction) =
 };
 
 export const login = async (req: Request, res: Response, _next: NextFunction) => {
-	const validBody = validateUserLogin(req.body);
-	if (validBody.error) {
-		return res.status(401).json({ msg: validBody.error.details });
-	}
 	try {
 		const user = await UserModel.findOne({ email: req.body.email.toLowerCase() });
 		if (!user) {

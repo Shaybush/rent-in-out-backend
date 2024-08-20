@@ -28,7 +28,7 @@ export const sendEmail = (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		transporter.sendMail(email, () => {
 			res.json({
-				status: 'send',
+				status: 201,
 				message: 'The message sent successfully',
 			});
 			return;

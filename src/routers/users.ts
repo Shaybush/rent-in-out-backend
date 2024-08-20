@@ -18,11 +18,12 @@ import {
 	deleteUser,
 	deleteProfileImg,
 	deleteBannerImg,
-} from '../controllers/userCtrl';
-import { login, requestPasswordReset, resetPassword, signUp, verifiedUser, verifyUser } from '../controllers/authCtrl';
-import { chatUpdate, deleteChat, deleteMessage, getChatByRoomID, getUserChats } from '../controllers/socketCtrl';
+} from '../services/userService';
+import { login, requestPasswordReset, resetPassword, signUp, verifiedUser, verifyUser } from '../services/authService';
+import { chatUpdate, deleteChat, deleteMessage, getChatByRoomID, getUserChats } from '../services/socketService';
 import { loginGmail } from '../middlewares/loginGmail.middleware';
-import { sendEmail } from '../controllers/sendEmail';
+import { sendEmail } from '../services/emailService';
+import { userControl, userLoginControl, userSuperAdminControl } from '../controllers/userControl';
 
 const router = express.Router();
 
@@ -39,9 +40,9 @@ router.get('/getAllChat', auth, getUserChats);
 router.get('/getWishList', auth, getWishListOfUser);
 router.get('/users-by-date', auth, getUsersCountByDate);
 
-router.put('/:idEdit', auth, editUser);
-router.patch('/changeRole/:userID', authAdmin, changeUserRole);
-router.patch('/changeActive/:userID', authAdmin, changeUserActiveStatus);
+router.put('/:idEdit', auth, userControl, editUser);
+router.patch('/changeRole/:userID', authAdmin, userSuperAdminControl, changeUserRole);
+router.patch('/changeActive/:userID', authAdmin, userSuperAdminControl, changeUserActiveStatus);
 router.patch('/rankUser/:userID', auth, rankUser);
 router.patch('/uploadProfile', auth, uploadProfileImg);
 router.patch('/uploadBanner', auth, uploadBannerImg);
@@ -53,12 +54,12 @@ router.delete('/deleteMessage/:roomID/:msgID', auth, deleteMessage);
 
 router.post('/cloudinary/profileDel', deleteProfileImg);
 router.post('/cloudinary/bannerDel', auth, deleteBannerImg);
-router.post('/', signUp);
-router.post('/login', loginGmail, login);
+router.post('/', userControl, signUp);
+router.post('/login', loginGmail, userLoginControl, login);
 router.post('/requestPasswordReset', requestPasswordReset);
 router.post('/resetPassword', resetPassword);
 router.post('/clientEmail', sendEmail);
-// // google signIn
+// google signIn
 router.post('/login/gmail', loginGmail);
 
 export default router;

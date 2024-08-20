@@ -1,11 +1,11 @@
 import { UserModel } from '../models/userModel';
-import { validateUser } from '../validations/userValid';
 import { config } from '../config/config';
-import { createToken, select } from '../helpers/userHelper';
+import { createToken, select } from '../utils/userHelper';
 import { v2 as cloudinary } from 'cloudinary';
 import { NextFunction, Request, Response } from 'express';
 import { SortOrder } from 'mongoose';
 import { Cloudinary } from '../models/interfaces/userInterface.interface';
+import { cloudinaryBannerConfig, cloudinaryProfileConfig } from '../utils/cloudinary-utils';
 
 // TODO - add type for req - understand why req.tokenData._id cannot defined
 export const checkToken = (req, res: Response, _next: NextFunction) => {
@@ -76,9 +76,6 @@ export const countUsers = async (req: Request, res: Response, _next: NextFunctio
 export const changeUserRole = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const userID = req.params.userID;
-		if (userID === config.superID) {
-			return res.status(401).json({ msg: 'You cannot change Superadmin to user' });
-		}
 		const user = await UserModel.findOne({ _id: userID }).populate({
 			path: 'wishList',
 			populate: { path: 'creator_id', select },
@@ -96,9 +93,6 @@ export const changeUserRole = async (req: Request, res: Response, _next: NextFun
 export const changeUserActiveStatus = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const userID = req.params.userID;
-		if (userID === config.superID) {
-			return res.status(401).json({ msg: 'You cannot change Superadmin to user' });
-		}
 		const user = await UserModel.findOne({ _id: userID }).populate({
 			path: 'wishList',
 			populate: { path: 'creator_id', select },
@@ -135,10 +129,6 @@ export const deleteUser = async (req, res: Response, _next: NextFunction) => {
 
 // TODO - add type for req - understand why req.tokenData._id cannot defined
 export const editUser = async (req, res: Response, _next: NextFunction) => {
-	const userValid = validateUser(req.body);
-	if (!userValid) {
-		return res.status(400).json({ msg: 'Need to send valid body' });
-	}
 	try {
 		const idEdit = req.params.idEdit;
 		if (req.body.email || req.body.password) {
@@ -283,13 +273,7 @@ export const uploadBannerImg = async (req, res: Response, _next: NextFunction) =
 
 export const deleteProfileImg = (req: Request, res: Response, _next: NextFunction) => {
 	const id = req.query.id as string;
-	const details = {
-		cloud_name: config.cloudinary_profile_name,
-		api_key: config.cloudinary_profile_key,
-		api_secret: config.cloudinary_profile_secret,
-		type: 'upload',
-	};
-	cloudinary.uploader.destroy(id, details, (error, result) => {
+	cloudinary.uploader.destroy(id, cloudinaryProfileConfig, (error, result) => {
 		if (error) {
 			return res.json({ error });
 		}
@@ -299,13 +283,7 @@ export const deleteProfileImg = (req: Request, res: Response, _next: NextFunctio
 
 export const deleteBannerImg = (req: Request, res: Response, _next: NextFunction) => {
 	const id = req.query.id as string;
-	const details = {
-		cloud_name: config.cloudinary_banner_name,
-		api_key: config.cloudinary_banner_key,
-		api_secret: config.cloudinary_banner_secret,
-		type: 'upload',
-	};
-	cloudinary.uploader.destroy(id, details, (error, result) => {
+	cloudinary.uploader.destroy(id, cloudinaryBannerConfig, (error, result) => {
 		if (error) {
 			return res.json({ error });
 		}

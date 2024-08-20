@@ -1,6 +1,6 @@
 import { config } from '../config/config';
-import { checkUndefinedOrNull } from '../helpers/functions';
-import { select } from '../helpers/userHelper';
+import { checkUndefinedOrNull } from '../utils/functions';
+import { select } from '../utils/userHelper';
 import { NextFunction, Request, Response } from 'express';
 import { PostModel } from '../models/postModel';
 import { UserModel } from '../models/userModel';
@@ -41,10 +41,6 @@ export const getPostByID = async (req: Request, res: Response, _next: NextFuncti
 
 // TODO - add type for req - understand why req.tokenData._id cannot defined
 export const uploadPost = async (req, res: Response, _next: NextFunction) => {
-	const validBody = validatePost(req.body);
-	if (validBody.error) {
-		return res.status(400).json(validBody.error.details);
-	}
 	try {
 		const newPost = new PostModel(req.body);
 		newPost.creator_id = req.tokenData._id;
@@ -215,12 +211,6 @@ export const getUserPosts = async (req: Request, res: Response, _next: NextFunct
 
 // TODO - add type for req - understand why req.tokenData._id cannot defined
 export const changePostRange = async (req, res: Response, _next: NextFunction) => {
-	if (!req.body.range) {
-		return res.status(400).json({ msg: 'Need to send range in body' });
-	}
-	if (req.body.range !== 'long-term' && req.body.range !== 'short-term') {
-		return res.status(400).json({ msg: 'Range must be long/short-term' });
-	}
 	try {
 		const postID = req.params.postID;
 		let data;
