@@ -9,7 +9,8 @@ import {
 } from '../services/categoryService';
 import { authAdmin } from '../middlewares/auth';
 import { categoryControl } from '../controllers/categoryControl';
-const router = express.Router();
+
+const router = express();
 
 router.get('/', getCategorylist);
 router.get('/search', authAdmin, searchCategories);

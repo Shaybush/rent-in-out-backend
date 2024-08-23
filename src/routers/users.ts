@@ -25,7 +25,7 @@ import { loginGmail } from '../middlewares/loginGmail.middleware';
 import { sendEmail } from '../services/emailService';
 import { userControl, userLoginControl, userSuperAdminControl } from '../controllers/userControl';
 
-const router = express.Router();
+const router = express();
 
 router.get('/verified', verifiedUser);
 router.get('/verify/:userId/:uniqueString', verifyUser);

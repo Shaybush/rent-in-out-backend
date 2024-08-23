@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { validateUser, validateUserLogin } from '../validations/userValid';
-import { config } from '../config/config';
+import { envConfig } from '../config/config-env';
 
 export const userControl = (req: Request, res: Response, next: NextFunction): void => {
 	const { error } = validateUser(req.body);
@@ -24,7 +24,7 @@ export const userLoginControl = (req: Request, res: Response, next: NextFunction
 
 export const userSuperAdminControl = (req: Request, res: Response, next: NextFunction): void => {
 	const userID = req.params.userID;
-	if (userID === config.superID) {
+	if (userID === envConfig.superID) {
 		res.status(401).json({ msg: 'You cannot change Superadmin to user' });
 	} else {
 		next();

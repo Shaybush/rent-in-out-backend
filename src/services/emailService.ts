@@ -1,30 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
-import { config } from '../config/config';
-import nodemailer from 'nodemailer';
-
-const transporter = nodemailer.createTransport({
-	host: 'smtp.gmail.com',
-	port: 465,
-	secure: true,
-	auth: {
-		user: config.gmailUser,
-		pass: config.gmailPass,
-	},
-});
-
-const mailOptions = (subject: string, html: string) => {
-	return {
-		from: config.gmailUser,
-		to: config.gmailUser,
-		subject,
-		html,
-	};
-};
+import { createEmailOptions, transporter } from '../config/mail.config';
 
 export const sendEmail = (req: Request, res: Response, _next: NextFunction) => {
 	let subject = 'mail send from ' + req.body.phone;
 	let htmlMessage = `<div color:danger> <h2>${req.body.firstName} - ${req.body.lastName}</h2> <span>${req.body.phone}</span> | <span>${req.body.email}</span> <p>${req.body.textarea}</p> </div>`;
-	const email = mailOptions(subject, htmlMessage);
+	const email = createEmailOptions(subject, htmlMessage);
 	try {
 		transporter.sendMail(email, () => {
 			res.json({

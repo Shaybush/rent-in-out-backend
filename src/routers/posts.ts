@@ -20,7 +20,7 @@ import {
 	uploadPost,
 } from '../services/postService';
 import { postControl, postRangeControl } from '../controllers/postControl';
-const router = express.Router();
+const router = express();
 
 router.get('/', getAllPosts);
 router.get('/getPostByID/:postID', getPostByID);

@@ -1,7 +1,6 @@
-import { validateUser, validateUserLogin } from '../validations/userValid';
 import bcrypt from 'bcrypt';
 import { UserModel } from '../models/userModel';
-import { sendResetEmail, sendVerificationEmail, createToken } from '../utils/userHelper';
+import { sendResetEmail, sendVerificationEmail, createToken } from '../utils/user-utils';
 import { UserVerificationModel } from '../models/userVerificationModel';
 import path from 'path';
 import { PasswordReset } from '../models/passwordReset';
