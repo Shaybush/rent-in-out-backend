@@ -1,4 +1,4 @@
-// import { Request as ExpressRequest } from 'express';
+// import { Request as ExpressRequest, Request } from 'express';
 // import { Types } from 'mongoose';
 
 // // --------------------- params ---------------------
@@ -148,4 +148,9 @@
 // 	};
 // }
 
-// TODO - uncomment if need to
+// export interface CustomRequest2 extends Request {
+// 	tokenData: {
+// 		_id: string | Types.ObjectId;
+// 		role: string;
+// 	};
+// }

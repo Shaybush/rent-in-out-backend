@@ -1,16 +1,14 @@
 import jwt from 'jsonwebtoken';
-import { config } from '../config/config';
+import { envConfig } from '../config/config-env';
 import { NextFunction, Request, Response } from 'express';
 
-// TODO - figure out how to handle type issue with req: Request ->  not recognize this req.tokenData
-// I added this type in the declaration file... index.d.ts
-export const auth = (req, res: Response, next: NextFunction) => {
+export const auth = (req: Request, res: Response, next: NextFunction) => {
 	let token = req.header('x-api-key');
 	if (!token) {
 		return res.status(401).json({ msg: 'please send token this end point url ' });
 	}
 	try {
-		let tokenData = jwt.verify(token, config.tokenSecret);
+		let tokenData = jwt.verify(token, envConfig.tokenSecret);
 		req.tokenData = tokenData;
 		next();
 	} catch (err) {
@@ -18,14 +16,13 @@ export const auth = (req, res: Response, next: NextFunction) => {
 	}
 };
 
-// TODO - figure out how to handle type issue with req: Request ->  not recognize this req.tokenData
-export const authAdmin = (req, res: Response, next: NextFunction) => {
+export const authAdmin = (req: Request, res: Response, next: NextFunction) => {
 	let token = req.header('x-api-key');
 	if (!token) {
 		return res.status(401).json({ msg: 'You need to send token to this endpoint url' });
 	}
 	try {
-		let decodeToken = jwt.verify(token, config.tokenSecret);
+		let decodeToken = jwt.verify(token, envConfig.tokenSecret);
 		if (decodeToken.role !== 'admin') {
 			return res.status(401).json({ msg: 'Token is not admin' });
 		}

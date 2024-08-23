@@ -2,9 +2,9 @@ import indexR from './index';
 import usersR from './users';
 import postR from './posts';
 import categoriesR from './categories';
-import { Express } from 'express';
+import { Router } from 'express';
 
-export const routesInit = (app: Express) => {
+export const routesInit = (app: Router) => {
 	app.use('/', indexR);
 	app.use('/users', usersR);
 	app.use('/posts', postR);

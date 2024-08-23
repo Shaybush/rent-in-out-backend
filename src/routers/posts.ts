@@ -18,8 +18,9 @@ import {
 	searchPosts,
 	updatePost,
 	uploadPost,
-} from '../controllers/postCtrl';
-const router = express.Router();
+} from '../services/postService';
+import { postControl, postRangeControl } from '../controllers/postControl';
+const router = express();
 
 router.get('/', getAllPosts);
 router.get('/getPostByID/:postID', getPostByID);
@@ -31,13 +32,13 @@ router.get('/countMyPosts', auth, countMyPosts);
 router.get('/userPosts/:userID', getUserPosts);
 router.get('/count-by-category', countPostsByCategory);
 
-router.post('/', auth, uploadPost);
+router.post('/', auth, postControl, uploadPost);
 router.post('/likePost/:postID', auth, likePost);
 router.post('/singleImgDel/:postID/:imgID', auth, deleteSinglePostImage);
 router.post('/onCancelImgDel', auth, onCancelDelete);
 
 router.put('/:postID', auth, updatePost);
-router.patch('/changeRange/:postID', auth, changePostRange);
+router.patch('/changeRange/:postID', auth, postRangeControl, changePostRange);
 router.patch('/changeActive/:postID', authAdmin, changeActiveStatus);
 
 router.delete('/:postID', auth, deletePost);

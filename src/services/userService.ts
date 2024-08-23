@@ -1,14 +1,14 @@
 import { UserModel } from '../models/userModel';
-import { validateUser } from '../validations/userValid';
-import { config } from '../config/config';
-import { createToken, select } from '../helpers/userHelper';
+import { envConfig } from '../config/config-env';
+import { createToken } from '../utils/user-utils';
 import { v2 as cloudinary } from 'cloudinary';
 import { NextFunction, Request, Response } from 'express';
 import { SortOrder } from 'mongoose';
 import { Cloudinary } from '../models/interfaces/userInterface.interface';
+import { cloudinaryBannerConfig, cloudinaryProfileConfig } from '../utils/cloudinary-utils';
+import { selectFieldsPopulate } from '../config/populat.config';
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const checkToken = (req, res: Response, _next: NextFunction) => {
+export const checkToken = (req: Request, res: Response, _next: NextFunction) => {
 	return res.json(req.tokenData);
 };
 
@@ -17,7 +17,7 @@ export const getUserInfoById = async (req: Request, res: Response, _next: NextFu
 		const id = req.params.id;
 		const userInfo = await UserModel.findOne({ _id: id }, { password: 0 }).populate({
 			path: 'wishList',
-			populate: { path: 'creator_id', select },
+			populate: { path: 'creator_id', select: selectFieldsPopulate },
 		});
 		if (!userInfo) {
 			return res.status(404).json({ message: 'User not found' });
@@ -34,7 +34,7 @@ export const getUserInfoByIdWithToken = async (req: Request, res: Response, _nex
 		const id = req.params.id;
 		const userInfo = await UserModel.findOne({ _id: id }, { password: 0 }).populate({
 			path: 'wishList',
-			populate: { path: 'creator_id', select },
+			populate: { path: 'creator_id', select: selectFieldsPopulate },
 		});
 		if (!userInfo) {
 			return res.status(404).json({ message: 'User not found' });
@@ -52,7 +52,7 @@ export const getUsersList = async (req: Request, res: Response, _next: NextFunct
 	const sort = (req.query.sort as string) || 'role';
 	const reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
 	try {
-		const data = await UserModel.find({ _id: { $ne: config.superID } }, { password: 0 })
+		const data = await UserModel.find({ _id: { $ne: envConfig.superID } }, { password: 0 })
 			.limit(perPage)
 			.skip((page - 1) * perPage)
 			.sort([[sort, reverse]]);
@@ -76,12 +76,9 @@ export const countUsers = async (req: Request, res: Response, _next: NextFunctio
 export const changeUserRole = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const userID = req.params.userID;
-		if (userID === config.superID) {
-			return res.status(401).json({ msg: 'You cannot change Superadmin to user' });
-		}
 		const user = await UserModel.findOne({ _id: userID }).populate({
 			path: 'wishList',
-			populate: { path: 'creator_id', select },
+			populate: { path: 'creator_id', select: selectFieldsPopulate },
 		});
 		user.role = user.role === 'admin' ? 'user' : 'admin';
 		user.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
@@ -96,12 +93,9 @@ export const changeUserRole = async (req: Request, res: Response, _next: NextFun
 export const changeUserActiveStatus = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const userID = req.params.userID;
-		if (userID === config.superID) {
-			return res.status(401).json({ msg: 'You cannot change Superadmin to user' });
-		}
 		const user = await UserModel.findOne({ _id: userID }).populate({
 			path: 'wishList',
-			populate: { path: 'creator_id', select },
+			populate: { path: 'creator_id', select: selectFieldsPopulate },
 		});
 		user.active = !user.active;
 		user.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
@@ -113,8 +107,7 @@ export const changeUserActiveStatus = async (req: Request, res: Response, _next:
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const deleteUser = async (req, res: Response, _next: NextFunction) => {
+export const deleteUser = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const idDel = req.params.idDel;
 		let userInfo;
@@ -133,12 +126,7 @@ export const deleteUser = async (req, res: Response, _next: NextFunction) => {
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const editUser = async (req, res: Response, _next: NextFunction) => {
-	const userValid = validateUser(req.body);
-	if (!userValid) {
-		return res.status(400).json({ msg: 'Need to send valid body' });
-	}
+export const editUser = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const idEdit = req.params.idEdit;
 		if (req.body.email || req.body.password) {
@@ -159,8 +147,7 @@ export const editUser = async (req, res: Response, _next: NextFunction) => {
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const rankUser = async (req, res: Response, _next: NextFunction) => {
+export const rankUser = async (req: Request, res: Response, _next: NextFunction) => {
 	const rankedUserId = req.params.userID;
 	const rnk = req.body.rnk;
 	if (rnk > 5) {
@@ -222,7 +209,7 @@ export const searchUsers = async (req: Request, res: Response, _next: NextFuncti
 		const users = await UserModel.find(
 			{
 				$and: [
-					{ _id: { $ne: config.superID } },
+					{ _id: { $ne: envConfig.superID } },
 					{
 						$or: [
 							{ 'fullName.firstName': searchReg },
@@ -245,8 +232,7 @@ export const searchUsers = async (req: Request, res: Response, _next: NextFuncti
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const uploadProfileImg = async (req, res: Response, _next: NextFunction) => {
+export const uploadProfileImg = async (req: Request, res: Response, _next: NextFunction) => {
 	const image: Cloudinary = req.body as unknown as Cloudinary;
 
 	if (image) {
@@ -263,8 +249,7 @@ export const uploadProfileImg = async (req, res: Response, _next: NextFunction) 
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const uploadBannerImg = async (req, res: Response, _next: NextFunction) => {
+export const uploadBannerImg = async (req: Request, res: Response, _next: NextFunction) => {
 	const banner: Cloudinary = req.body as unknown as Cloudinary;
 
 	if (banner) {
@@ -283,13 +268,7 @@ export const uploadBannerImg = async (req, res: Response, _next: NextFunction) =
 
 export const deleteProfileImg = (req: Request, res: Response, _next: NextFunction) => {
 	const id = req.query.id as string;
-	const details = {
-		cloud_name: config.cloudinary_profile_name,
-		api_key: config.cloudinary_profile_key,
-		api_secret: config.cloudinary_profile_secret,
-		type: 'upload',
-	};
-	cloudinary.uploader.destroy(id, details, (error, result) => {
+	cloudinary.uploader.destroy(id, cloudinaryProfileConfig, (error, result) => {
 		if (error) {
 			return res.json({ error });
 		}
@@ -299,13 +278,7 @@ export const deleteProfileImg = (req: Request, res: Response, _next: NextFunctio
 
 export const deleteBannerImg = (req: Request, res: Response, _next: NextFunction) => {
 	const id = req.query.id as string;
-	const details = {
-		cloud_name: config.cloudinary_banner_name,
-		api_key: config.cloudinary_banner_key,
-		api_secret: config.cloudinary_banner_secret,
-		type: 'upload',
-	};
-	cloudinary.uploader.destroy(id, details, (error, result) => {
+	cloudinary.uploader.destroy(id, cloudinaryBannerConfig, (error, result) => {
 		if (error) {
 			return res.json({ error });
 		}
@@ -313,16 +286,15 @@ export const deleteBannerImg = (req: Request, res: Response, _next: NextFunction
 	});
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const getWishListOfUser = async (req, res: Response, _next: NextFunction) => {
+export const getWishListOfUser = async (req: Request, res: Response, _next: NextFunction) => {
 	const user = await UserModel.findOne({ _id: req.tokenData._id })
 		.populate({
 			path: 'wishList',
-			populate: { path: 'creator_id', select },
+			populate: { path: 'creator_id', select: selectFieldsPopulate },
 		})
 		.populate({
 			path: 'wishList',
-			populate: { path: 'likes', select },
+			populate: { path: 'likes', select: selectFieldsPopulate },
 		});
 	try {
 		// TODO - improve ts ignore
@@ -340,7 +312,7 @@ export const getWishListOfUser = async (req, res: Response, _next: NextFunction)
 };
 
 export const getUsersCountByDate = async (req: Request, res: Response, _next: NextFunction) => {
-	const data = await UserModel.find({ _id: { $ne: config.superID } }, { password: 0 });
+	const data = await UserModel.find({ _id: { $ne: envConfig.superID } }, { password: 0 });
 	const usersCreatedDates = data.map((user) => user.createdAt);
 	const sortedUsersCreatedDates = usersCreatedDates.sort();
 

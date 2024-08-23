@@ -11,6 +11,7 @@ import { routesInit } from './routers/config_routes';
 import { sockets } from './routers/socket';
 import 'dotenv/config';
 import './db/mongoconnect';
+import { PORT } from './utils/environment-variables';
 
 const app = express();
 
@@ -58,8 +59,7 @@ app.get('/', (req: Request, res: Response) => {
 	res.json('Socket ready');
 });
 
-let port = process.env.PORT || 3001;
-server.listen(port, () => {
-	console.log(`Server is running on port: ${port}`);
+server.listen(PORT, () => {
+	console.log(`Server is running on port: ${PORT}`);
 });
 io.on('connection', sockets);

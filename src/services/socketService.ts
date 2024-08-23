@@ -28,8 +28,7 @@ export const chatUpdate = async (req: Request, res: Response, _next: NextFunctio
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const getChatByRoomID = async (req, res: Response, _next: NextFunction) => {
+export const getChatByRoomID = async (req: Request, res: Response, _next: NextFunction) => {
 	const message: any = await UserModel.findOne({ _id: req.tokenData._id }).populate({
 		path: 'messages',
 	});
@@ -46,8 +45,7 @@ export const getChatByRoomID = async (req, res: Response, _next: NextFunction) =
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const getUserChats = async (req, res: Response, _next: NextFunction) => {
+export const getUserChats = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const message: any = await UserModel.findOne({ _id: req.tokenData._id }).populate({
 			path: 'messages',
@@ -63,8 +61,7 @@ export const getUserChats = async (req, res: Response, _next: NextFunction) => {
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const deleteMessage = async (req, res: Response, _next: NextFunction) => {
+export const deleteMessage = async (req: Request, res: Response, _next: NextFunction) => {
 	const messageId = req.params.msgID;
 	const roomID = req.params.roomID;
 	try {

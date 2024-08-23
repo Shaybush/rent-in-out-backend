@@ -1,12 +1,11 @@
-import { config } from '../config/config';
-import { checkUndefinedOrNull } from '../helpers/functions';
-import { select } from '../helpers/userHelper';
+import { envConfig } from '../config/config-env';
+import { checkUndefinedOrNull } from '../utils/utils';
 import { NextFunction, Request, Response } from 'express';
 import { PostModel } from '../models/postModel';
 import { UserModel } from '../models/userModel';
-import { validatePost } from '../validations/postValid';
 import { v2 as cloudinary } from 'cloudinary';
 import { SortOrder, Types } from 'mongoose';
+import { selectFieldsPopulate } from '../config/populat.config';
 
 const MAX = 10000000;
 const MIN = 0;
@@ -21,8 +20,8 @@ export const getAllPosts = async (req: Request, res: Response, _next: NextFuncti
 			.sort([[sort, reverse]])
 			.limit(perPage)
 			.skip((page - 1) * perPage)
-			.populate({ path: 'likes', select })
-			.populate({ path: 'creator_id', select });
+			.populate({ path: 'likes', select: selectFieldsPopulate })
+			.populate({ path: 'creator_id', select: selectFieldsPopulate });
 		return res.json(posts);
 	} catch (err) {
 		return res.status(500).json({ err });
@@ -32,33 +31,27 @@ export const getAllPosts = async (req: Request, res: Response, _next: NextFuncti
 export const getPostByID = async (req: Request, res: Response, _next: NextFunction) => {
 	const postID = req.params.postID;
 	try {
-		const post = await PostModel.findById(postID).populate({ path: 'creator_id', select });
+		const post = await PostModel.findById(postID).populate({ path: 'creator_id', select: selectFieldsPopulate });
 		return res.status(200).json(post);
 	} catch (err) {
 		return res.status(500).json({ err: 'Cannot find the post.' });
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const uploadPost = async (req, res: Response, _next: NextFunction) => {
-	const validBody = validatePost(req.body);
-	if (validBody.error) {
-		return res.status(400).json(validBody.error.details);
-	}
+export const uploadPost = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const newPost = new PostModel(req.body);
 		newPost.creator_id = req.tokenData._id;
 		await newPost.save();
 
-		const post = await PostModel.findById(newPost._id).populate({ path: 'creator_id', select });
+		const post = await PostModel.findById(newPost._id).populate({ path: 'creator_id', select: selectFieldsPopulate });
 		return res.status(201).json(post);
 	} catch (err) {
 		return res.status(500).json({ err });
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const updatePost = async (req, res: Response, _next: NextFunction) => {
+export const updatePost = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const postID = req.params.postID;
 		let data;
@@ -80,13 +73,12 @@ export const updatePost = async (req, res: Response, _next: NextFunction) => {
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const deletePost = async (req, res: Response, _next: NextFunction) => {
+export const deletePost = async (req: Request, res: Response, _next: NextFunction) => {
 	const postID = req.params.postID;
 	const details = {
-		cloud_name: config.cloudinary_post_name,
-		api_key: config.cloudinary_post_key,
-		api_secret: config.cloudinary_post_secret,
+		cloud_name: envConfig.cloudinary_post_name,
+		api_key: envConfig.cloudinary_post_key,
+		api_secret: envConfig.cloudinary_post_secret,
 		type: 'upload',
 	};
 
@@ -128,8 +120,7 @@ export const countAllPosts = async (req: Request, res: Response, _next: NextFunc
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const countMyPosts = async (req, res: Response, _next: NextFunction) => {
+export const countMyPosts = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const count = await PostModel.countDocuments({ creator_id: req.tokenData._id });
 		return res.json({ count });
@@ -138,18 +129,19 @@ export const countMyPosts = async (req, res: Response, _next: NextFunction) => {
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const searchPosts = async (req, res: Response, _next: NextFunction) => {
+export const searchPosts = async (req: Request, res: Response, _next: NextFunction) => {
 	const perPage = Math.min(Number(req.query.perPage) || 15, 20);
 	const page = Number(req.query.page) || 1;
 	const sort = (req.query.sort as string) || 'createdAt';
 	const reverse: SortOrder = req.query.reverse === 'yes' ? -1 : 1;
 
 	try {
-		const searchQ = checkUndefinedOrNull(req.query?.searchQ) ? '' : req.query.searchQ;
+		const searchQ = checkUndefinedOrNull(req.query?.searchQ) ? '' : (req.query.searchQ as string);
 		const max = checkUndefinedOrNull(req.query?.max) ? MAX : req.query.max;
 		const min = checkUndefinedOrNull(req.query?.min) ? MIN : req.query?.min;
-		const categories = checkUndefinedOrNull(req.query?.categories) ? null : req.query?.categories.split(',');
+		const categories = checkUndefinedOrNull(req.query?.categories)
+			? null
+			: (req.query?.categories as string).split(',');
 		const searchReg = new RegExp(searchQ, 'i');
 		const posts = categories?.length
 			? await PostModel.find({
@@ -160,8 +152,8 @@ export const searchPosts = async (req, res: Response, _next: NextFunction) => {
 					.limit(perPage)
 					.skip((page - 1) * perPage)
 					.sort([[sort, reverse]])
-					.populate({ path: 'likes', select })
-					.populate({ path: 'creator_id', select })
+					.populate({ path: 'likes', select: selectFieldsPopulate })
+					.populate({ path: 'creator_id', select: selectFieldsPopulate })
 			: await PostModel.find({
 					title: { $regex: searchReg },
 					price: { $gte: min, $lt: max },
@@ -169,8 +161,8 @@ export const searchPosts = async (req, res: Response, _next: NextFunction) => {
 					.limit(perPage)
 					.skip((page - 1) * perPage)
 					.sort([[sort, reverse]])
-					.populate({ path: 'likes', select })
-					.populate({ path: 'creator_id', select });
+					.populate({ path: 'likes', select: selectFieldsPopulate })
+					.populate({ path: 'creator_id', select: selectFieldsPopulate });
 
 		return res.json({ count: posts.length, posts });
 	} catch (err) {
@@ -181,7 +173,7 @@ export const searchPosts = async (req, res: Response, _next: NextFunction) => {
 export const changeActiveStatus = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const postID = req.params.postID;
-		if (postID === config.superID) {
+		if (postID === envConfig.superID) {
 			return res.status(401).json({ msg: 'You cannot change superadmin to user' });
 		}
 		const post = await PostModel.findOne({ _id: postID });
@@ -206,25 +198,18 @@ export const getUserPosts = async (req: Request, res: Response, _next: NextFunct
 			.limit(perPage)
 			.skip((page - 1) * perPage)
 			.sort([[sort, reverse]])
-			.populate({ path: 'creator_id', select });
+			.populate({ path: 'creator_id', select: selectFieldsPopulate });
 		return res.json(posts);
 	} catch (err) {
 		return res.status(500).json({ err });
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const changePostRange = async (req, res: Response, _next: NextFunction) => {
-	if (!req.body.range) {
-		return res.status(400).json({ msg: 'Need to send range in body' });
-	}
-	if (req.body.range !== 'long-term' && req.body.range !== 'short-term') {
-		return res.status(400).json({ msg: 'Range must be long/short-term' });
-	}
+export const changePostRange = async (req: Request, res: Response, _next: NextFunction) => {
 	try {
 		const postID = req.params.postID;
 		let data;
-		if (postID === config.superID) {
+		if (postID === envConfig.superID) {
 			return res.status(401).json({ msg: 'You cannot change superadmin to user' });
 		}
 		if (req.tokenData.role === 'admin') {
@@ -241,13 +226,12 @@ export const changePostRange = async (req, res: Response, _next: NextFunction) =
 	}
 };
 
-// TODO - add type for req - understand why req.tokenData._id cannot defined
-export const likePost = async (req, res: Response, _next: NextFunction) => {
+export const likePost = async (req: Request, res: Response, _next: NextFunction) => {
 	const user = await UserModel.findById(req.tokenData._id);
 	const postID = req.params.postID;
 	const post = await PostModel.findOne({ _id: postID })
-		.populate({ path: 'likes', select })
-		.populate({ path: 'creator_id', select });
+		.populate({ path: 'likes', select: selectFieldsPopulate })
+		.populate({ path: 'creator_id', select: selectFieldsPopulate });
 
 	const found = post.likes.some((el) => String(el.id) === req.tokenData._id);
 	if (!found) {
@@ -306,9 +290,9 @@ export const onCancelDelete = (req: Request, res: Response, _next: NextFunction)
 export const deleteSinglePostImage = async (req: Request, res: Response, _next: NextFunction) => {
 	const { postID, imgID } = req.params;
 	const details = {
-		cloud_name: config.cloudinary_post_name,
-		api_key: config.cloudinary_post_key,
-		api_secret: config.cloudinary_post_secret,
+		cloud_name: envConfig.cloudinary_post_name,
+		api_key: envConfig.cloudinary_post_key,
+		api_secret: envConfig.cloudinary_post_secret,
 		type: 'upload',
 	};
 	const post = await PostModel.findById(postID);

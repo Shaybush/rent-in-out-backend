@@ -1,7 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
-import { getUserDetailFromAccessToken } from '../helpers/services/axiosService';
 import { UserModel } from '../models/userModel';
-import { createToken } from '../helpers/userHelper';
+import { createToken, getUserDetailFromAccessToken } from '../utils/user-utils';
 
 export const loginGmail = async (req: Request, res: Response, next: NextFunction) => {
 	let google_email;
