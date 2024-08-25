@@ -5,6 +5,7 @@ import { NextFunction, Request, Response } from 'express';
 import { SortOrder } from 'mongoose';
 import { Cloudinary } from '../models/interfaces/userInterface.interface';
 import { selectFieldsPopulate } from '../config/populat.config';
+import { deleteImageCloudinary } from './cloudinaryService';
 
 export const checkToken = (req: Request, res: Response, _next: NextFunction) => {
 	return res.json(req.tokenData);
@@ -238,9 +239,9 @@ export const uploadProfileImg = async (req: Request, res: Response, _next: NextF
 			const user = await UserModel.findOne({ _id: req.tokenData._id });
 			user.profile_img = image;
 			await user.save();
-			return res.status(200).json({ msg: 'Profile image has been changed' });
+			return res.status(200).json({ res: 'Profile image has been changed' });
 		} catch (err) {
-			return res.status(500).json({ msg: 'Error occurred', err });
+			return res.status(500).json({ res: 'Error occurred', err });
 		}
 	} else {
 		return res.status(404).json({ msg: 'Must send an image' });
@@ -255,12 +256,12 @@ export const uploadBannerImg = async (req: Request, res: Response, _next: NextFu
 			const user = await UserModel.findOne({ _id: req.tokenData._id });
 			user.cover_img = banner;
 			await user.save();
-			return res.status(200).json({ msg: 'Banner image has been changed' });
+			return res.status(200).json({ res: 'Banner image has been changed' });
 		} catch (err) {
-			return res.status(500).json({ msg: 'Error occurred', err });
+			return res.status(500).json({ res: 'Error occurred', err });
 		}
 	} else {
-		return res.status(404).json({ msg: 'Must send a banner' });
+		return res.status(404).json({ res: 'Must send a banner' });
 	}
 };
 
