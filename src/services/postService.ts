@@ -76,9 +76,9 @@ export const updatePost = async (req: Request, res: Response, _next: NextFunctio
 export const deletePost = async (req: Request, res: Response, _next: NextFunction) => {
 	const postID = req.params.postID;
 	const details = {
-		cloud_name: envConfig.cloudinary_post_name,
-		api_key: envConfig.cloudinary_post_key,
-		api_secret: envConfig.cloudinary_post_secret,
+		cloud_name: envConfig.cloudinary_name,
+		api_key: envConfig.cloudinary_key,
+		api_secret: envConfig.cloudinary_secret,
 		type: 'upload',
 	};
 
@@ -290,9 +290,9 @@ export const onCancelDelete = (req: Request, res: Response, _next: NextFunction)
 export const deleteSinglePostImage = async (req: Request, res: Response, _next: NextFunction) => {
 	const { postID, imgID } = req.params;
 	const details = {
-		cloud_name: envConfig.cloudinary_post_name,
-		api_key: envConfig.cloudinary_post_key,
-		api_secret: envConfig.cloudinary_post_secret,
+		cloud_name: envConfig.cloudinary_name,
+		api_key: envConfig.cloudinary_key,
+		api_secret: envConfig.cloudinary_secret,
 		type: 'upload',
 	};
 	const post = await PostModel.findById(postID);
