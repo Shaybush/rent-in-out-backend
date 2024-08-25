@@ -16,6 +16,8 @@ import {
 	uploadProfileImg,
 	uploadBannerImg,
 	deleteUser,
+	deleteProfileImg,
+	deleteBannerImg,
 } from '../services/userService';
 import { login, requestPasswordReset, resetPassword, signUp, verifiedUser, verifyUser } from '../services/authService';
 import { chatUpdate, deleteChat, deleteMessage, getChatByRoomID, getUserChats } from '../services/socketService';
@@ -42,14 +44,16 @@ router.put('/:idEdit', auth, userControl, editUser);
 router.patch('/changeRole/:userID', authAdmin, userSuperAdminControl, changeUserRole);
 router.patch('/changeActive/:userID', authAdmin, userSuperAdminControl, changeUserActiveStatus);
 router.patch('/rankUser/:userID', auth, rankUser);
-router.patch('/chatUpdate', auth, chatUpdate);
 router.patch('/uploadProfile', auth, uploadProfileImg);
 router.patch('/uploadBanner', auth, uploadBannerImg);
+router.patch('/chatUpdate', auth, chatUpdate);
 
 router.delete('/:idDel', auth, deleteUser);
 router.delete('/deleteChat/:chatID', auth, deleteChat);
 router.delete('/deleteMessage/:roomID/:msgID', auth, deleteMessage);
 
+router.post('/cloudinary/profileDel', deleteProfileImg);
+router.post('/cloudinary/bannerDel', auth, deleteBannerImg);
 router.post('/', userControl, signUp);
 router.post('/login', loginGmail, userLoginControl, login);
 router.post('/requestPasswordReset', requestPasswordReset);
