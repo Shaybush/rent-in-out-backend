@@ -14,11 +14,7 @@ export const envConfig = {
 	gmailPass: process.env.AUTH_PASS,
 	google_client_id: process.env.GOOGLE_CLIENT_ID,
 	google_client_secret: process.env.GOOGLE_CLIENT_SECRET,
-	// cloudinary profile only
-	cloudinary_profile_name: process.env.CLOUDINARY_PROFILE_NAME,
-	cloudinary_profile_key: process.env.CLOUDINARY_PROFILE_KEY,
-	cloudinary_profile_secret: process.env.CLOUDINARY_PROFILE_SECRET,
-	// cloudinary posts with banners
+	// cloudinary
 	cloudinary_name: process.env.CLOUDINARY_NAME,
 	cloudinary_key: process.env.CLOUDINARY_KEY,
 	cloudinary_secret: process.env.CLOUDINARY_SECRET,
