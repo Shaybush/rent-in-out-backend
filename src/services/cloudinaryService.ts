@@ -16,10 +16,10 @@ export const deleteImageCloudinary = (req: Request, res: Response, _next: NextFu
 	try {
 		cloudinary.config(cloudinaryConfig);
 		cloudinary.uploader.destroy(img_id, (error: ICloudinaryErrorModel, result: ICloudinaryResultModel) => {
-			if (error) return res.json({ error });
-			res.send(result);
+			if (error) return res.status(400).json({ error });
+			res.status(201).send(result);
 		});
 	} catch (error) {
-		res.json({ error: `Couldn't find resource with id - ${img_id}` });
+		res.status(500).json({ error: `Couldn't find resource with id - ${img_id}` });
 	}
 };
