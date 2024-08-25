@@ -2,6 +2,7 @@ import indexR from './index';
 import usersR from './users';
 import postR from './posts';
 import categoriesR from './categories';
+import cloudinaryR from './cloudinary';
 import { Router } from 'express';
 
 export const routesInit = (app: Router) => {
@@ -9,4 +10,5 @@ export const routesInit = (app: Router) => {
 	app.use('/users', usersR);
 	app.use('/posts', postR);
 	app.use('/categories', categoriesR);
+	app.use('/cloudinary', cloudinaryR);
 };

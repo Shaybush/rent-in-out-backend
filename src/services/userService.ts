@@ -1,11 +1,9 @@
 import { UserModel } from '../models/userModel';
 import { envConfig } from '../config/config-env';
 import { createToken } from '../utils/user-utils';
-import { v2 as cloudinary } from 'cloudinary';
 import { NextFunction, Request, Response } from 'express';
 import { SortOrder } from 'mongoose';
 import { Cloudinary } from '../models/interfaces/userInterface.interface';
-import { cloudinaryBannerConfig, cloudinaryProfileConfig } from '../utils/cloudinary-utils';
 import { selectFieldsPopulate } from '../config/populat.config';
 
 export const checkToken = (req: Request, res: Response, _next: NextFunction) => {
@@ -264,26 +262,6 @@ export const uploadBannerImg = async (req: Request, res: Response, _next: NextFu
 	} else {
 		return res.status(404).json({ msg: 'Must send a banner' });
 	}
-};
-
-export const deleteProfileImg = (req: Request, res: Response, _next: NextFunction) => {
-	const id = req.query.id as string;
-	cloudinary.uploader.destroy(id, cloudinaryProfileConfig, (error, result) => {
-		if (error) {
-			return res.json({ error });
-		}
-		return res.json({ result });
-	});
-};
-
-export const deleteBannerImg = (req: Request, res: Response, _next: NextFunction) => {
-	const id = req.query.id as string;
-	cloudinary.uploader.destroy(id, cloudinaryBannerConfig, (error, result) => {
-		if (error) {
-			return res.json({ error });
-		}
-		return res.json({ result });
-	});
 };
 
 export const getWishListOfUser = async (req: Request, res: Response, _next: NextFunction) => {
