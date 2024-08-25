@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { IPasswordReset } from './interfaces/passwordReset.interface';
+import { IPasswordReset } from '../interfaces/passwordReset.interface';
 
 let PasswordResetSchema = new mongoose.Schema({
 	userId: String,

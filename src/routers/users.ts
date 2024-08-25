@@ -49,8 +49,47 @@ router.patch('/uploadBanner', auth, uploadBannerImg);
 router.delete('/:idDel', auth, deleteUser);
 router.delete('/deleteChat/:chatID', auth, deleteChat);
 router.delete('/deleteMessage/:roomID/:msgID', auth, deleteMessage);
-
+// TODO - check why it's not working
 router.post('/', userControl, signUp);
+/**
+ * @swagger
+ * /users/login:
+ *   post:
+ *     tags: ['Auth operations']
+ *     description: Login to the app
+ *     requestBody:
+ *        description: User's data
+ *        required: true
+ *        content:
+ *           application/json:
+ *               schema:
+ *                  type: object
+ *                  required: [ "username", "password" ]
+ *                  properties:
+ *                      username:
+ *                          type: string
+ *                          example: "MyUserName"
+ *                      password:
+ *                          type: string
+ *                          example: "MyPassword515"
+ *     responses:
+ *       200:
+ *         description: Logged in successfully
+ *         content:
+ *             application/json:
+ *                   schema:
+ *                     type: object
+ *                     properties:
+ *                      token:
+ *                         type: string
+ *                         example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                      user:
+ *                        $ref: "#/components/schemas/user"
+ *       400:
+ *         description: Login failed
+ *       500:
+ *         description: Internal server error
+ */
 router.post('/login', loginGmail, userLoginControl, login);
 router.post('/requestPasswordReset', requestPasswordReset);
 router.post('/resetPassword', resetPassword);

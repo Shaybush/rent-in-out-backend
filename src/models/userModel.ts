@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { IUser } from './interfaces/userInterface.interface';
+import { IUser } from '../interfaces/userInterface.interface';
 
 const cloudinary = { url: String, img_id: String };
 const rank = {

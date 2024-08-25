@@ -1,0 +1,34 @@
+{
+  "swaggerDefinition": {
+      "openapi": "3.0.3",
+      "info": {
+          "version": "1.0.0",
+          "title": "Rent In Out REST API",
+          "description": "A REST API built with Express and MongoDB."
+      },
+      "basePath": "/swagger",
+      "tags": [
+          { "name": "Main operations" },
+          { "name": "Auth operations" },
+          { "name": "Categories operations" },
+          { "name": "Cloudinary operations" },
+          { "name": "Posts operations" },
+          { "name": "Users operations" }
+      ],
+      "components": {
+        "securitySchemes": {
+          "apiKeyAuth": {
+            "type": "apiKey",
+            "in": "header",
+            "name": "x-api-key"
+          }
+        }
+      },
+      "security": [
+        {
+          "apiKeyAuth": []
+        }
+      ]
+  },
+  "apis": ["**/*.ts"]
+}

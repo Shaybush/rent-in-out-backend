@@ -12,6 +12,10 @@ import { sockets } from './routers/socket';
 import 'dotenv/config';
 import './db/mongoconnect';
 import { PORT } from './utils/environment-variables';
+import swaggerJsDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
+import schemas from './models/swaggerSchemas';
+import swaggerDocument from './swagger-docs.json';
 
 const app = express();
 
@@ -43,6 +47,15 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 	console.log(req.method, req.originalUrl);
 	next();
 });
+
+// swagger options - start
+// @ts-ignore
+swaggerDocument.swaggerDefinition.components.schemas = schemas;
+const swaggerOptions = { customCssUrl: '/swagger.css' };
+
+const swaggerDocs = swaggerJsDoc(swaggerDocument);
+app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerDocs, swaggerOptions));
+// swagger options - end
 
 routesInit(app);
 

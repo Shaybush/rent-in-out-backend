@@ -6,7 +6,7 @@ import path from 'path';
 import { PasswordReset } from '../models/passwordReset';
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
-import { IUserVerification } from '../models/interfaces/userVerification.interface';
+import { IUserVerification } from '../interfaces/userVerification.interface';
 
 dotenv.config();
 const saltRounds = 10;
