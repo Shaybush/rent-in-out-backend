@@ -15,7 +15,7 @@ import { PORT } from './utils/environment-variables';
 
 const app = express();
 
-// configuration urls to orgin
+// configuration url to orgin
 const originUrls = [
 	'https://rentinout.onrender.com',
 	'http://rentinout.onrender.com',
