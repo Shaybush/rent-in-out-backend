@@ -3,7 +3,7 @@ import { envConfig } from '../config/config-env';
 import { createToken } from '../utils/user-utils';
 import { NextFunction, Request, Response } from 'express';
 import { SortOrder } from 'mongoose';
-import { Cloudinary } from '../models/interfaces/userInterface.interface';
+import { Cloudinary } from '../interfaces/userInterface.interface';
 import { selectFieldsPopulate } from '../config/populat.config';
 import { deleteImageCloudinary } from './cloudinaryService';
 

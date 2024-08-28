@@ -1,5 +1,5 @@
 import mongoose, { Schema } from 'mongoose';
-import { IUserVerification } from './interfaces/userVerification.interface';
+import { IUserVerification } from '../interfaces/userVerification.interface';
 
 const userVerificationSchema: Schema = new Schema({
 	userId: { type: String, required: true },
