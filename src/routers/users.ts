@@ -64,11 +64,11 @@ router.post('/', userControl, signUp);
  *           application/json:
  *               schema:
  *                  type: object
- *                  required: [ "username", "password" ]
+ *                  required: [ "email", "password" ]
  *                  properties:
- *                      username:
+ *                      email:
  *                          type: string
- *                          example: "MyUserName"
+ *                          example: "johnsnow@gmail.com"
  *                      password:
  *                          type: string
  *                          example: "MyPassword515"
