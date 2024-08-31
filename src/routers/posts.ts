@@ -28,7 +28,6 @@ const router = express();
  *   get:
  *     tags:
  *       - Posts operations
- *     summary: Get all posts
  *     description: Retrieve a list of all posts with pagination, sorting, and filtering options.
  *     parameters:
  *       - in: query
@@ -65,29 +64,7 @@ const router = express();
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                     description: The unique identifier of the post.
- *                   title:
- *                     type: string
- *                     description: The title of the post.
- *                   content:
- *                     type: string
- *                     description: The content of the post.
- *                   createdAt:
- *                     type: string
- *                     format: date-time
- *                     description: The creation timestamp of the post.
- *                   likes:
- *                     type: array
- *                     items:
- *                       type: string
- *                     description: Array of user IDs who liked the post.
- *                   creator_id:
- *                     type: string
- *                     description: The user ID of the post creator.
+ *                 $ref: "#/components/schemas/post"
  *       500:
  *         description: Internal server error
  *         content:
@@ -107,7 +84,6 @@ router.get('/', getAllPosts);
  *   get:
  *     tags:
  *       - Posts operations
- *     summary: Get a post by its ID
  *     description: Retrieve a specific post by providing its ID.
  *     parameters:
  *       - in: path
@@ -122,30 +98,7 @@ router.get('/', getAllPosts);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 _id:
- *                   type: string
- *                   description: The unique identifier of the post.
- *                 title:
- *                   type: string
- *                   description: The title of the post.
- *                 content:
- *                   type: string
- *                   description: The content of the post.
- *                 createdAt:
- *                   type: string
- *                   format: date-time
- *                   description: The creation timestamp of the post.
- *                 creator_id:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                       description: The unique identifier of the creator.
- *                     username:
- *                       type: string
- *                       description: The username of the post creator.
+ *                $ref: "#/components/schemas/post"
  *       404:
  *         description: Post not found
  *         content:
@@ -175,7 +128,6 @@ router.get('/getPostByID/:postID', getPostByID);
  *   get:
  *     tags:
  *       - Posts operations
- *     summary: Count all posts
  *     description: Returns the total number of posts in the database.
  *     responses:
  *       200:
@@ -210,7 +162,6 @@ router.get('/count', countAllPosts);
  *   get:
  *     tags:
  *       - Posts operations
- *     summary: Search for posts with filtering, sorting, and pagination
  *     description: Search posts based on a query, price range, categories, and other options. Supports pagination and sorting.
  *     parameters:
  *       - in: query
@@ -273,44 +224,7 @@ router.get('/count', countAllPosts);
  *                 posts:
  *                   type: array
  *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                         description: The unique identifier of the post.
- *                       title:
- *                         type: string
- *                         description: The title of the post.
- *                       price:
- *                         type: number
- *                         description: The price of the post.
- *                       category_url:
- *                         type: string
- *                         description: The URL slug of the category.
- *                       createdAt:
- *                         type: string
- *                         format: date-time
- *                         description: The creation timestamp of the post.
- *                       creator_id:
- *                         type: object
- *                         properties:
- *                           _id:
- *                             type: string
- *                             description: The unique identifier of the creator.
- *                           username:
- *                             type: string
- *                             description: The username of the post creator.
- *                       likes:
- *                         type: array
- *                         items:
- *                           type: object
- *                           properties:
- *                             _id:
- *                               type: string
- *                               description: The unique identifier of the like.
- *                             user_id:
- *                               type: string
- *                               description: The ID of the user who liked the post.
+ *                     $ref: "#/components/schemas/post"
  *       500:
  *         description: Internal server error
  *         content:
@@ -330,7 +244,6 @@ router.get('/search', searchPosts);
  *   get:
  *     tags:
  *       - Posts operations
- *     summary: Count the number of likes for a specific post
  *     description: Retrieve the total number of likes for a post identified by its ID.
  *     parameters:
  *       - in: path
@@ -372,7 +285,6 @@ router.get('/checkLikes/:postID', countPostLikes);
  *   get:
  *     tags:
  *       - Posts operations
- *     summary: Retrieve the top three likes for a specific post
  *     description: Get the first three likes for a post identified by its ID. This retrieves a subset of likes from the post.
  *     parameters:
  *       - in: path
@@ -422,7 +334,7 @@ router.get('/topThreeLikes/:postID', getTopThreeLikes);
  *   get:
  *     tags:
  *       - Posts operations
- *     summary: Count the number of posts created by the current user , Must be connected as user
+ *     summary: Must be connected as user
  *     description: Retrieves the total number of posts created by the user identified by the token in the request. Ensure that the request includes authentication middleware to set `req.tokenData`.
  *     security:
  *       - apiKeyAuth: []   # This line adds the x-api-key to this specific route
@@ -452,7 +364,7 @@ router.get('/topThreeLikes/:postID', getTopThreeLikes);
  *                   description: Details of the error.
  *     components:
  *       securitySchemes:
- *         BearerAuth:
+ *         apiKeyAuth:
  *           type: http
  *           scheme: bearer
  *           bearerFormat: JWT
@@ -461,11 +373,10 @@ router.get('/countMyPosts', auth, countMyPosts);
 
 /**
  * @swagger
- * /users/{userID}/posts:
+ * /posts/userPosts/{userID}:
  *   get:
  *     tags:
  *       - Posts operations
- *     summary: Retrieve posts created by a specific user
  *     description: Fetches a paginated and sorted list of posts created by the user identified by the `userID` parameter.
  *     parameters:
  *       - in: path
@@ -508,30 +419,7 @@ router.get('/countMyPosts', auth, countMyPosts);
  *             schema:
  *               type: array
  *               items:
- *                 type: object
- *                 properties:
- *                   _id:
- *                     type: string
- *                     description: The unique identifier of the post.
- *                   title:
- *                     type: string
- *                     description: The title of the post.
- *                   content:
- *                     type: string
- *                     description: The content of the post.
- *                   createdAt:
- *                     type: string
- *                     format: date-time
- *                     description: The creation timestamp of the post.
- *                   creator_id:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                         description: The unique identifier of the creator.
- *                       username:
- *                         type: string
- *                         description: The username of the post creator.
+ *                 $ref: "#/components/schemas/post"
  *       500:
  *         description: Internal server error
  *         content:
@@ -547,11 +435,10 @@ router.get('/userPosts/:userID', getUserPosts);
 
 /**
  * @swagger
- * /posts/count/categories:
+ * /posts/count-by-category:
  *   get:
  *     tags:
  *       - Posts operations
- *     summary: Count posts by category
  *     description: Retrieves the count of posts grouped by their categories. This endpoint aggregates posts to provide a count for each category.
  *     responses:
  *       200:
@@ -591,10 +478,10 @@ router.get('/count-by-category', countPostsByCategory);
  *   post:
  *     tags:
  *       - Posts operations
- *     summary: Upload a new post , Must be connected as user
+ *     summary: Must be connected as user
  *     description: Creates a new post with the provided data. The `creator_id` is set from the authenticated user token. The newly created post is then returned.
  *     security:
- *       - BearerAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []  # Indicates that the endpoint requires a bearer token for authentication
  *     requestBody:
  *       required: true
  *       content:
@@ -668,14 +555,14 @@ router.post('/', auth, postControl, uploadPost);
 
 /**
  * @swagger
- * /posts/{postID}/like:
+ * /posts/likePost/{postID}:
  *   post:
  *     tags:
  *       - Posts operations
- *     summary: Like or unlike a post , Must be connected as user
+ *     summary: Must be connected as user
  *     description: Allows a user to like or unlike a post. If the user likes the post, the post's likes are updated, and the post is added to the user's wishlist if not already present. If the user unlikes the post, the like is removed and the post is removed from the user's wishlist if present.
  *     security:
- *       - BearerAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []    # Indicates that the endpoint requires a bearer token for authentication
  *     parameters:
  *       - in: path
  *         name: postID
@@ -694,19 +581,7 @@ router.post('/', auth, postControl, uploadPost);
  *                 posts:
  *                   type: array
  *                   items:
- *                     type: string
- *                     description: List of user IDs who liked the post.
- *                 post:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                       description: The unique identifier of the post.
- *                     likes:
- *                       type: array
- *                       items:
- *                         type: string
- *                         description: List of user IDs who liked the post.
+ *                     $ref: "#/components/schemas/user"
  *                 msg:
  *                   type: string
  *                   description: Status message indicating whether the post was liked or unliked.
@@ -729,10 +604,10 @@ router.post('/likePost/:postID', auth, likePost);
  *   delete:
  *     tags:
  *       - Posts operations
- *     summary: Delete an image from a post , Must be connected as user
+ *     summary: Must be connected as user
  *     description: Removes a specific image from a post and deletes the image from Cloudinary using its image ID. The post's image list is updated accordingly.
  *     security:
- *       - BearerAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []  # Indicates that the endpoint requires a bearer token for authentication
  *     parameters:
  *       - in: path
  *         name: postID
@@ -782,7 +657,7 @@ router.post('/singleImgDel/:postID/:imgID', auth, deleteSinglePostImage);
  *   post:
  *     tags:
  *       - General operations
- *     summary: Handle cancel delete operation, Must be connected as user
+ *     summary: Must be connected as user
  *     description: Endpoint to handle the cancellation of a delete operation. Returns a success message indicating that the delete operation was cancelled.
  *     responses:
  *       200:
@@ -817,10 +692,10 @@ router.post('/onCancelImgDel', auth, onCancelDelete);
  *   put:
  *     tags:
  *       - Posts operations
- *     summary: Update a post ,Must be connected as user
+ *     summary: Must be connected as user
  *     description: Allows updating a post by its ID. Admins can update any post, while regular users can only update posts they created. The post's `updatedAt` field is also updated to reflect the time of the update.
  *     security:
- *       - BearerAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []  # Indicates that the endpoint requires a bearer token for authentication
  *     parameters:
  *       - in: path
  *         name: postID
@@ -904,10 +779,10 @@ router.put('/:postID', auth, updatePost);
  *   put:
  *     tags:
  *       - Posts operations
- *     summary: Change the range of a post , Must be connected as user
+ *     summary: Must be connected as user
  *     description: Updates the range of a post specified by its ID. Only admins can update any post, while regular users can only update posts they created. Superadmin posts cannot have their range changed.
  *     security:
- *       - BearerAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []  # Indicates that the endpoint requires a bearer token for authentication
  *     parameters:
  *       - in: path
  *         name: postID
@@ -976,10 +851,10 @@ router.patch('/changeRange/:postID', auth, postRangeControl, changePostRange);
  *   patch:
  *     tags:
  *       - Posts operations
- *     summary: Toggle the active status of a post, Must be connected as admin
+ *     summary: Must be connected as admin
  *     description: Toggles the `active` status of a post by its ID. Admins can change the status of any post, but the operation will not affect posts with a specific `superID` which is protected.
  *     security:
- *       - BearerAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []  # Indicates that the endpoint requires a bearer token for authentication
  *     parameters:
  *       - in: path
  *         name: postID
@@ -1037,10 +912,10 @@ router.patch('/changeActive/:postID', authAdmin, changeActiveStatus);
  *   delete:
  *     tags:
  *       - Posts operations
- *     summary: Delete a post and its associated images , Must be connected as user
+ *     summary: Must be connected as user
  *     description: Deletes a post specified by its ID from the database and removes its associated images from Cloudinary. If an error occurs while deleting the images from Cloudinary, it will be returned in the response.
  *     security:
- *       - BearerAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []    # Indicates that the endpoint requires a bearer token for authentication
  *     parameters:
  *       - in: path
  *         name: postID
