@@ -3,13 +3,14 @@ import { auth } from '../middlewares/auth';
 import { deleteImageCloudinary } from '../services/cloudinaryService';
 
 const router = express();
+
 /**
  * @swagger
  * /cloudinary/image:
  *   delete:
  *     tags:
  *       - Cloudinary operations
- *     summary: Delete an image from Cloudinary
+ *     summary: Must be connected as user
  *     description: Deletes an image from Cloudinary using its image ID.
  *     requestBody:
  *       required: true
@@ -64,7 +65,6 @@ const router = express();
  *                   type: string
  *                   description: Couldn't find resource with id
  */
-
 router.delete('/image', auth, deleteImageCloudinary);
 
 export default router;
