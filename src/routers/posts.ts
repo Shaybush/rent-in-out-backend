@@ -304,14 +304,7 @@ router.get('/checkLikes/:postID', countPostLikes);
  *                 likes:
  *                   type: array
  *                   items:
- *                     type: object
- *                     properties:
- *                       _id:
- *                         type: string
- *                         description: The unique identifier of the like.
- *                       user_id:
- *                         type: string
- *                         description: The ID of the user who liked the post.
+ *                     $ref: "#/components/schemas/user"
  *       500:
  *         description: Internal server error
  *         content:
@@ -481,7 +474,7 @@ router.get('/count-by-category', countPostsByCategory);
  *     summary: Must be connected as user
  *     description: Creates a new post with the provided data. The `creator_id` is set from the authenticated user token. The newly created post is then returned.
  *     security:
- *       - apiKeyAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -510,36 +503,7 @@ router.get('/count-by-category', countPostsByCategory);
  *         content:
  *           application/json:
  *             schema:
- *               type: object
- *               properties:
- *                 _id:
- *                   type: string
- *                   description: The unique identifier of the post.
- *                 title:
- *                   type: string
- *                   description: The title of the post.
- *                 content:
- *                   type: string
- *                   description: The content of the post.
- *                 category_url:
- *                   type: string
- *                   description: The category of the post.
- *                 price:
- *                   type: number
- *                   description: The price associated with the post (if applicable).
- *                 createdAt:
- *                   type: string
- *                   format: date-time
- *                   description: The creation timestamp of the post.
- *                 creator_id:
- *                   type: object
- *                   properties:
- *                     _id:
- *                       type: string
- *                       description: The unique identifier of the creator.
- *                     username:
- *                       type: string
- *                       description: The username of the post creator.
+ *               $ref: "#/components/schemas/post"
  *       500:
  *         description: Internal server error
  *         content:
@@ -562,7 +526,7 @@ router.post('/', auth, postControl, uploadPost);
  *     summary: Must be connected as user
  *     description: Allows a user to like or unlike a post. If the user likes the post, the post's likes are updated, and the post is added to the user's wishlist if not already present. If the user unlikes the post, the like is removed and the post is removed from the user's wishlist if present.
  *     security:
- *       - apiKeyAuth: []    # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: postID
@@ -607,7 +571,7 @@ router.post('/likePost/:postID', auth, likePost);
  *     summary: Must be connected as user
  *     description: Removes a specific image from a post and deletes the image from Cloudinary using its image ID. The post's image list is updated accordingly.
  *     security:
- *       - apiKeyAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: postID
@@ -632,9 +596,6 @@ router.post('/likePost/:postID', auth, likePost);
  *                 msg:
  *                   type: string
  *                   description: Status message confirming the successful deletion of the image.
- *                 error:
- *                   type: object
- *                   description: Contains error details if an error occurred during image deletion from Cloudinary.
  *       500:
  *         description: Internal server error
  *         content:
@@ -642,9 +603,6 @@ router.post('/likePost/:postID', auth, likePost);
  *             schema:
  *               type: object
  *               properties:
- *                 msg:
- *                   type: string
- *                   description: Error message indicating that an error occurred.
  *                 error:
  *                   type: object
  *                   description: Details of the error encountered.
@@ -659,6 +617,8 @@ router.post('/singleImgDel/:postID/:imgID', auth, deleteSinglePostImage);
  *       - General operations
  *     summary: Must be connected as user
  *     description: Endpoint to handle the cancellation of a delete operation. Returns a success message indicating that the delete operation was cancelled.
+ *     security:
+ *       - apiKeyAuth: []
  *     responses:
  *       200:
  *         description: Success message confirming that the delete operation was cancelled.
@@ -695,7 +655,7 @@ router.post('/onCancelImgDel', auth, onCancelDelete);
  *     summary: Must be connected as user
  *     description: Allows updating a post by its ID. Admins can update any post, while regular users can only update posts they created. The post's `updatedAt` field is also updated to reflect the time of the update.
  *     security:
- *       - apiKeyAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: postID
@@ -760,14 +720,14 @@ router.post('/onCancelImgDel', auth, onCancelDelete);
  *                 err:
  *                   type: object
  *                   description: Details of any error encountered.
- *       401:
+ *       500:
  *         description: Unauthorized error if the user does not have permission to update the post.
  *         content:
  *           application/json:
  *             schema:
  *               type: object
  *               properties:
- *                 msg:
+ *                 err:
  *                   type: string
  *                   description: Error message indicating unauthorized access.
  */
@@ -782,7 +742,7 @@ router.put('/:postID', auth, updatePost);
  *     summary: Must be connected as user
  *     description: Updates the range of a post specified by its ID. Only admins can update any post, while regular users can only update posts they created. Superadmin posts cannot have their range changed.
  *     security:
- *       - apiKeyAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: postID
@@ -854,7 +814,7 @@ router.patch('/changeRange/:postID', auth, postRangeControl, changePostRange);
  *     summary: Must be connected as admin
  *     description: Toggles the `active` status of a post by its ID. Admins can change the status of any post, but the operation will not affect posts with a specific `superID` which is protected.
  *     security:
- *       - apiKeyAuth: []  # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: postID
@@ -915,7 +875,7 @@ router.patch('/changeActive/:postID', authAdmin, changeActiveStatus);
  *     summary: Must be connected as user
  *     description: Deletes a post specified by its ID from the database and removes its associated images from Cloudinary. If an error occurs while deleting the images from Cloudinary, it will be returned in the response.
  *     security:
- *       - apiKeyAuth: []    # Indicates that the endpoint requires a bearer token for authentication
+ *       - apiKeyAuth: []
  *     parameters:
  *       - in: path
  *         name: postID
@@ -948,12 +908,9 @@ router.patch('/changeActive/:postID', authAdmin, changeActiveStatus);
  *                     message:
  *                       type: string
  *                       description: Error message.
- *                     name:
+ *                     data:
  *                       type: string
- *                       description: Error name.
- *                     http_code:
- *                       type: integer
- *                       description: HTTP status code.
+ *                       description: null
  *       500:
  *         description: Internal server error
  *         content:
@@ -961,9 +918,6 @@ router.patch('/changeActive/:postID', authAdmin, changeActiveStatus);
  *             schema:
  *               type: object
  *               properties:
- *                 msg:
- *                   type: string
- *                   description: Error message indicating that an error occurred during the post deletion.
  *                 err:
  *                   type: object
  *                   description: Details of the error encountered.

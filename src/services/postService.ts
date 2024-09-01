@@ -69,7 +69,7 @@ export const updatePost = async (req: Request, res: Response, _next: NextFunctio
 		return res.status(400).json({ data: null, msg: 'Cannot edit post' });
 	} catch (err) {
 		console.error(err);
-		return res.status(400).json({ err });
+		return res.status(500).json({ err });
 	}
 };
 
@@ -107,7 +107,7 @@ export const deletePost = async (req: Request, res: Response, _next: NextFunctio
 		return res.status(400).json({ data: null, msg: 'User cannot delete this post' });
 	} catch (err) {
 		console.error(err);
-		return res.status(400).json({ err });
+		return res.status(500).json({ err });
 	}
 };
 
@@ -181,7 +181,7 @@ export const changeActiveStatus = async (req: Request, res: Response, _next: Nex
 		post.updatedAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
 		await post.save();
 
-		return res.json(post);
+		return res.status(200).json(post);
 	} catch (err) {
 		return res.status(500).json({ msg: 'Error', err });
 	}
