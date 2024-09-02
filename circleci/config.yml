@@ -1,0 +1,108 @@
+version: 2.1
+
+parameters:
+  run_on_production:
+    type: boolean
+    default: true
+
+
+jobs:
+  setup_and_run_playwright_tests:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.46.0-jammy
+    resource_class: large
+    parallelism: 4
+    working_directory: ~/app
+
+    steps:
+      - checkout
+      - run: npm i -D @playwright/test
+      - run: npx playwright install chrome
+      - run:
+          name: create enviornment file from circle ci.
+          command: |
+            set -x
+            # echo ${CIRCLECI_PARAMETER_BRANCH_OVERRIDE_URL}
+            mkdir environment
+            cd environment
+            ENV_FILE=".env.local_sanity"
+            echo "USERNAME1=${USERNAME1}" >> "$ENV_FILE"
+            echo "PASSWORD1=${PASSWORD1}" >> "$ENV_FILE"
+            set +x
+      - run:
+          name: run the test.
+          command: |
+            set -x
+            TOTAL_SHARDS=4
+            CURRENT_SHARD=$((CIRCLE_NODE_INDEX + 1))
+            export ENV=alpha;
+            npx playwright test tests --project=chrome --reporter=line,junit,allure-playwright --shard=$CURRENT_SHARD/$TOTAL_SHARDS --workers=
+            set +x
+          environment:
+            PLAYWRIGHT_JUNIT_OUTPUT_NAME: results.xml
+
+      - store_test_results:
+          path: results.xml
+
+
+  setup_and_run_playwright_tests_on_production:
+    docker:
+      - image: mcr.microsoft.com/playwright:v1.46.0-jammy
+    resource_class: large
+    parallelism: 4
+    working_directory: ~/app
+
+    steps:
+      - checkout
+      - run: npm i -D @playwright/test
+      - run: npx playwright install chrome
+      - run:
+          name: create enviornment file from circle ci.
+          command: |
+            set -x
+            # echo ${CIRCLECI_PARAMETER_BRANCH_OVERRIDE_URL}
+            mkdir environment
+            cd environment
+            ENV_FILE=".env.local_sanity"
+            echo "USERNAME1=${USERNAME1}" >> "$ENV_FILE"
+            echo "PASSWORD1=${PASSWORD1}" >> "$ENV_FILE"
+            set +x
+      - run:
+          name: run the test.
+          command: |
+            set -x
+            TOTAL_SHARDS=4
+            CURRENT_SHARD=$((CIRCLE_NODE_INDEX + 1))
+
+            export ENV=prod;
+            npx playwright test tests/Melio --project=chrome --reporter=line,junit,allure-playwright --shard=$CURRENT_SHARD/$TOTAL_SHARDS --workers=4
+
+      - store_test_results:
+          path: results.xml
+
+      - store_artifacts:
+          path: test-results
+      - run:
+          when: always
+          name: download allurectl
+          command: |
+            wget https://github.com/allure-framework/allurectl/releases/latest/download/allurectl_linux_amd64 -O ./allurectl
+            chmod +x ./allurectl
+            ls -al allurectl
+
+
+workflows:
+  build:
+    jobs:
+      - setup_and_run_playwright_tests
+  daily:
+    triggers:
+      - schedule:
+          cron: "0 21 * * *"
+          filters:
+            branches:
+              only:
+                - main
+
+    jobs:
+      - setup_and_run_playwright_tests_on_production
