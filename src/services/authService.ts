@@ -101,7 +101,7 @@ export const requestPasswordReset = (req: Request, res: Response, _next: NextFun
 	UserModel.findOne({ email }).then((data) => {
 		if (data) {
 			if (!data.active) {
-				return res.json({
+				return res.status(403).json({
 					status: 'failed',
 					message: "Email isn't verified yet or account has been suspended, please check your email",
 				});
@@ -109,7 +109,9 @@ export const requestPasswordReset = (req: Request, res: Response, _next: NextFun
 				sendResetEmail(data, redirectUrl, res);
 			}
 		} else {
-			return res.json({ status: 'failed', message: 'No account with the supplied email found. Please try again.' });
+			return res
+				.status(404)
+				.json({ status: 'failed', message: 'No account with the supplied email found. Please try again.' });
 		}
 	});
 };
@@ -121,7 +123,7 @@ export const resetPassword = async (req: Request, res: Response, _next: NextFunc
 		if (result) {
 			if (result.expiresAt < Date.now() + 2 * 60 * 60 * 1000) {
 				await PasswordReset.deleteOne({ userId });
-				return res.status(401).json({ msg: 'Password reset link has expired' });
+				return res.status(403).json({ msg: 'Password reset link has expired' });
 			} else {
 				const validReset = await bcrypt.compare(resetString, result.resetString as string);
 				if (validReset) {
@@ -134,7 +136,7 @@ export const resetPassword = async (req: Request, res: Response, _next: NextFunc
 						await PasswordReset.deleteOne({ userId });
 						return res.status(200).json({ status: 'Success', msg: 'Password reset successfully' });
 					} else {
-						return res.status(401).json({ msg: 'Failed to update user password' });
+						return res.status(400).json({ msg: 'Failed to update user password' });
 					}
 				} else {
 					return res.status(401).json({ msg: 'Invalid password reset details' });

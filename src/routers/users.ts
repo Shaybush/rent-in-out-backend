@@ -49,8 +49,8 @@ router.patch('/uploadBanner', auth, uploadBannerImg);
 router.delete('/:idDel', auth, deleteUser);
 router.delete('/deleteChat/:chatID', auth, deleteChat);
 router.delete('/deleteMessage/:roomID/:msgID', auth, deleteMessage);
-// TODO - check why it's not working
 router.post('/', userControl, signUp);
+
 /**
  * @swagger
  * /users/login:
@@ -71,7 +71,7 @@ router.post('/', userControl, signUp);
  *                          example: "johnsnow@gmail.com"
  *                      password:
  *                          type: string
- *                          example: "MyPassword515"
+ *                          example: ""
  *     responses:
  *       200:
  *         description: Logged in successfully
@@ -91,10 +91,154 @@ router.post('/', userControl, signUp);
  *         description: Internal server error
  */
 router.post('/login', loginGmail, userLoginControl, login);
+/**
+ * @swagger
+ * /users/requestPasswordReset:
+ *   post:
+ *     tags: ['Auth operations']
+ *     description: Login to the app
+ *     requestBody:
+ *        description: User's data
+ *        required: true
+ *        content:
+ *           application/json:
+ *               schema:
+ *                  type: object
+ *                  required: [ "email", "redirectUrl" ]
+ *                  properties:
+ *                      email:
+ *                          type: string
+ *                          example: "shaybush93@gmail.com"
+ *                      password:
+ *                          type: string
+ *     responses:
+ *       403:
+ *         description: Email isn't verified yet or account has been suspended, please check your email
+ *       404:
+ *         description: No account with the supplied email found. Please try again.
+ */
 router.post('/requestPasswordReset', requestPasswordReset);
+/**
+ * @swagger
+ * /users/resetPassword:
+ *   post:
+ *     tags: ['Auth operations']
+ *     description: Login to the app
+ *     requestBody:
+ *        description: User's data
+ *        required: true
+ *        content:
+ *           application/json:
+ *               schema:
+ *                  type: object
+ *                  required: [ "userId", "resetString", "newPassword" ]
+ *                  properties:
+ *                      userId:
+ *                          type: string
+ *                      resetString:
+ *                          type: string
+ *                      newPassword:
+ *                          type: string
+ *     responses:
+ *       200:
+ *         description: Reset password has been changed succefully.
+ *         content:
+ *             application/json:
+ *                   schema:
+ *                     type: object
+ *                     properties:
+ *                      status:
+ *                         type: string
+ *                      msg:
+ *                        type: string
+ *       403:
+ *         description: Email isn't verified yet or account has been suspended, please check your email
+ *       404:
+ *         description: No account with the supplied email found. Please try again.
+ */
 router.post('/resetPassword', resetPassword);
+/**
+ * @swagger
+ * /users/resetPassword:
+ *   post:
+ *     tags: ['Auth operations']
+ *     description: Login to the app
+ *     requestBody:
+ *        description: User's data
+ *        required: true
+ *        content:
+ *           application/json:
+ *               schema:
+ *                  type: object
+ *                  required: [ "phone", "firstName", "lastName", "email", "textarea" ]
+ *                  properties:
+ *                      phone:
+ *                          type: string
+ *                      firstName:
+ *                          type: string
+ *                      lastName:
+ *                          type: string
+ *                      email:
+ *                          type: string
+ *                      textarea:
+ *                          type: string
+ *     responses:
+ *       200:
+ *         description: Reset password has been changed succefully.
+ *         content:
+ *             application/json:
+ *                   schema:
+ *                     type: object
+ *                     properties:
+ *                      status:
+ *                         type: string
+ *                      msg:
+ *                        type: string
+ *       403:
+ *         description: Email isn't verified yet or account has been suspended, please check your email
+ *       404:
+ *         description: No account with the supplied email found. Please try again.
+ */
 router.post('/clientEmail', sendEmail);
-// google signIn
+
+/**
+ * @swagger
+ * /users/login/gmail:
+ *   post:
+ *     tags: ['Auth operations']
+ *     description: Login with gmail token
+ *     requestBody:
+ *        description: User's data
+ *        required: true
+ *        content:
+ *           application/json:
+ *               schema:
+ *                  type: object
+ *                  required: "token"
+ *                  properties:
+ *                      token:
+ *                          type: string
+ *                          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+ *     responses:
+ *       200:
+ *         description: Logged in successfully
+ *         content:
+ *             application/json:
+ *                   schema:
+ *                     type: object
+ *                     properties:
+ *                      token:
+ *                         type: string
+ *                         example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *                      user:
+ *                        $ref: "#/components/schemas/user"
+ *       401:
+ *         description: User blocked / need to verify your email
+ *       404:
+ *         description: User not found
+ *       500:
+ *         description: Couldn't login google
+ */
 router.post('/login/gmail', loginGmail);
 
 export default router;

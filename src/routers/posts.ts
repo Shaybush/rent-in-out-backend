@@ -611,10 +611,10 @@ router.post('/singleImgDel/:postID/:imgID', auth, deleteSinglePostImage);
 
 /**
  * @swagger
- * /cancel-delete:
+ * /posts/cancel-delete:
  *   post:
  *     tags:
- *       - General operations
+ *       - Posts operations
  *     summary: Must be connected as user
  *     description: Endpoint to handle the cancellation of a delete operation. Returns a success message indicating that the delete operation was cancelled.
  *     security:
