@@ -14,8 +14,8 @@ import './db/mongoconnect';
 import { PORT } from './utils/environment-variables';
 import swaggerJsDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
-import schemas from './models/swaggerSchemas';
 import swaggerDocument from './swagger-docs.json';
+import { parametersDefinitions, schemasDefinitions } from './models/swagger';
 
 const app = express();
 
@@ -50,7 +50,9 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
 
 // swagger options - start
 // @ts-ignore
-swaggerDocument.swaggerDefinition.components.schemas = schemas;
+swaggerDocument.swaggerDefinition.components.schemas = schemasDefinitions;
+// @ts-ignore
+swaggerDocument.swaggerDefinition.components.parameters = parametersDefinitions;
 const swaggerOptions = { customCssUrl: '/swagger.css' };
 
 const swaggerDocs = swaggerJsDoc(swaggerDocument);
@@ -66,10 +68,6 @@ const io = new Server(server, {
 		origin: originUrls,
 		methods: ['GET', 'POST', 'PUT', 'DELETE'],
 	},
-});
-
-app.get('/', (req: Request, res: Response) => {
-	res.json('Socket ready');
 });
 
 server.listen(PORT, () => {
